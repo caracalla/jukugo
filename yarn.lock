@@ -45,10 +45,6 @@ mongodb@^2.2.19:
     mongodb-core "2.1.4"
     readable-stream "2.1.5"
 
-nan@>=2.0.0:
-  version "2.5.0"
-  resolved "https://registry.yarnpkg.com/nan/-/nan-2.5.0.tgz#aa8f1e34531d807e9e27755b234b4a6ec0c152a8"
-
 process-nextick-args@~1.0.6:
   version "1.0.7"
   resolved "https://registry.yarnpkg.com/process-nextick-args/-/process-nextick-args-1.0.7.tgz#150e20b756590ad3f91093f25a4f2ad8bff30ba3"
@@ -83,12 +79,6 @@ sax@>=0.6.0:
 semver@^5.1.0:
   version "5.3.0"
   resolved "https://registry.yarnpkg.com/semver/-/semver-5.3.0.tgz#9b2ce5d3de02d17c6012ad326aa6b4d0cf54f94f"
-
-sleep@^5.0.0:
-  version "5.0.0"
-  resolved "https://registry.yarnpkg.com/sleep/-/sleep-5.0.0.tgz#565d29a1ded05290180b571643d2ea794025b5ef"
-  dependencies:
-    nan ">=2.0.0"
 
 string_decoder@~0.10.x:
   version "0.10.31"
