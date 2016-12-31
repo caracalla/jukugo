@@ -7,6 +7,8 @@
   "author": "caracalla",
   "license": "MIT",
   "dependencies": {
+    "mongodb": "^2.2.19",
+    "sleep": "^5.0.0",
     "xml2js": "^0.4.17"
   }
 }
