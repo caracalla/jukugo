@@ -15,18 +15,24 @@ var katakana = ['ァ','ア','ィ','イ','ゥ','ウ','ェ','エ','ォ','オ','カ
 var others = ['！','＂','＃','＄','％','＆','＇','（','）','＊','＋','，','－','．','／','０','１','２','３','４','５','６','７','８','９','：','；','＜','＝','＞','？','＠','Ａ','Ｂ','Ｃ','Ｄ','Ｅ','Ｆ','Ｇ','Ｈ','Ｉ','Ｊ','Ｋ','Ｌ','Ｍ','Ｎ','Ｏ','Ｐ','Ｑ','Ｒ','Ｓ','Ｔ','Ｕ','Ｖ','Ｗ','Ｘ','Ｙ','Ｚ','［','＼','］','＾','＿','｀','ａ','ｂ','ｃ','ｄ','ｅ','ｆ','ｇ','ｈ','ｉ','ｊ','ｋ','ｌ','ｍ','ｎ','ｏ','ｐ','ｑ','ｒ','ｓ','ｔ','ｕ','ｖ','ｗ','ｘ','ｙ','ｚ','｛','｜','｝','～','｟','｠','｡','｢','｣','､','･','ｦ','ｧ','ｨ','ｩ','ｪ','ｫ','ｬ','ｭ','ｮ','ｯ','ｰ','ｱ','ｲ','ｳ','ｴ','ｵ','ｶ','ｷ','ｸ','ｹ','ｺ','ｻ','ｼ','ｽ','ｾ','ｿ','ﾀ','ﾁ','ﾂ','ﾃ','ﾄ','ﾅ','ﾆ','ﾇ','ﾈ','ﾉ','ﾊ','ﾋ','ﾌ','ﾍ','ﾎ','ﾏ','ﾐ','ﾑ','ﾒ','ﾓ','ﾔ','ﾕ','ﾖ','ﾗ','ﾘ','ﾙ','ﾚ','ﾛ','ﾜ','ﾝ','ﾞ','ﾟ']
 
 var kana = others.concat(hiragana).concat(katakana)
-var grade_1 = grade_1_kanji.concat(kana)
-var grade_2 = grade_2_kanji.concat(grade_1)
-var grade_3 = grade_3_kanji.concat(grade_2)
-var grade_4 = grade_4_kanji.concat(grade_3)
-var grade_5 = grade_5_kanji.concat(grade_4)
-var grade_6 = grade_6_kanji.concat(grade_5)
+var grade_1 = { kanji: grade_1_kanji, full_set: grade_1_kanji.concat(kana) }
+var grade_2 = { kanji: grade_2_kanji, full_set: grade_2_kanji.concat(grade_1.full_set) }
+var grade_3 = { kanji: grade_3_kanji, full_set: grade_3_kanji.concat(grade_2.full_set) }
+var grade_4 = { kanji: grade_4_kanji, full_set: grade_4_kanji.concat(grade_3.full_set) }
+var grade_5 = { kanji: grade_5_kanji, full_set: grade_5_kanji.concat(grade_4.full_set) }
+var grade_6 = { kanji: grade_6_kanji, full_set: grade_6_kanji.concat(grade_5.full_set) }
 
 var isGrade = function (word, grade) {
   characters = word.split('');
 
+  // In the case of grade 1, make sure that the word actually contains a grade 1
+  // kanji.  Do the same for grade 2, etc.
+  if (!characters.map(function (character) { return grade.kanji.includes(character); }).includes(true)) {
+    return false;
+  }
+
   return !characters.map(function (character) {
-    return grade.includes(character);
+    return grade.full_set.includes(character);
   }).includes(false)
 }
 
@@ -53,7 +59,7 @@ var parseKanjiElement = function (kanjiElement) {
   if (grade_level) { writingObject.grade = grade_level }
 
   if (Array.isArray(kanjiElement.ke_pri)) {
-    writingObject.priorities = kanjiElement.ke_pri;
+    writingObject.priority = kanjiElement.ke_pri.length;
   }
   if (Array.isArray(kanjiElement.ke_inf)) {
     writingObject.info = kanjiElement.ke_inf;
@@ -66,7 +72,7 @@ var parseReadingElement = function (readingElement) {
   var readingObject = { kana: readingElement.reb[0] };
 
   if (Array.isArray(readingElement.re_pri)) {
-    readingObject.priorities = readingElement.re_pri;
+    readingObject.priority = readingElement.re_pri.length;
   }
   if (Array.isArray(readingElement.re_inf)) {
     readingObject.info = readingElement.re_inf;
