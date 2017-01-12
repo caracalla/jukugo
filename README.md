@@ -11,7 +11,8 @@ A tool for learning Japanese.  Select words made up of kanji of various kyōiku 
 
 ## TODO
 * Sort results by "priority"
-* Implement React frontend
+* Implement Backbone frontend
 * Find a frequency list and update the priority values accordingly, or add a new field
+* Find all words containing a particular kanji within a grade
 
 [monash-ftp]: http://ftp.monash.edu.au/pub/nihongo/JMdict_e.gz
