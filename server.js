@@ -12,8 +12,8 @@ app.get('/', function (req, res) {
   var grade = 1;
   var page = 1;
   var pageSize = 50;
-  var findQuery = { "writings.grade": { $exists: true, $eq: grade } };
-  var sortQuery = { "writings.priority": -1 }
+  var findQuery = { "writings.grade": { $exists: true, $eq: grade }, "writings.frequency_rating": { $exists: true } };
+  var sortQuery = { "writings.priority": -1 };
 
   // db.entries.find({"writings.grade": {$exists: true, $eq: grade}}).skip(pagesize * (page - 1)).limit(pagesize);
   // result = db.entries.find({"writings.grade": {$exists: true, $eq: grade}}).limit(50);
