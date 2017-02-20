@@ -4,7 +4,7 @@ import './App.css';
 var Entry = function (props) {
   return (
     <div className="row">
-      <h1 className="display-4">
+      {/* <h1 className="display-4"> */}
         <ul className="nav nav-pills">
           {props.entry.writings.map(function (writing) {
             return (
@@ -14,7 +14,7 @@ var Entry = function (props) {
             );
           })}
         </ul>
-      </h1>
+      {/* </h1> */}
       <ul className="list-inline">
         {props.entry.readings.map(function (reading) {
           return (
@@ -24,16 +24,10 @@ var Entry = function (props) {
           );
         })}
       </ul>
-      <ul className="list-group">
         {props.entry.senses.map(function (sense) {
-          return (
-            <li className="list-group-item" key={sense.translations}>
-              <Sense sense={sense} />
-            </li>
-          );
+          return <Sense sense={sense} />
         })}
-      </ul>
-      <hr />
+      <br /><hr /><br />
     </div>
   );
 };
@@ -41,7 +35,16 @@ var Entry = function (props) {
 var Writing = function (props) {
   var pClass = props.writing.priority ? "nav-link active bg-danger" : "nav-link text-danger";
 
-  return <p className={pClass}>{props.writing.kanji}</p>;
+  return (
+    <div>
+      <h1 className="display-4 hidden-sm-down">
+        <p className={pClass}>{props.writing.kanji}</p>
+      </h1>
+      <h1 className="display-6 hidden-md-up">
+        <p className={pClass}>{props.writing.kanji}</p>
+      </h1>
+    </div>
+  );
 };
 
 var Reading = function (props) {
@@ -51,19 +54,120 @@ var Reading = function (props) {
 };
 
 var Sense = function (props) {
-  const translations = <span><strong>Translations:</strong> {props.sense.translations.join(", ")}</span>;
-
-  if (props.sense.partsOfSpeech) {
-    return (
-      <div>
-        <span className="lead"><strong>Parts of Speech:</strong> {props.sense.partsOfSpeech}</span>
-        <br />
-        {translations}
+  return (
+    <div className="card">
+      <div className="card-header">
+        <h4 className="card-title">{props.sense.partsOfSpeech.join(', ')}</h4>
       </div>
-    );
-  } else {
-    return translations;
-  }
+      <ul className="list-group list-group-flush">
+        {props.sense.translations.map(function (translation) {
+          return <Translation translation={translation} />
+        })}
+      </ul>
+    </div>
+  );
+};
+
+var Translation = function (props) {
+  // glossaries: [],
+  // similar: [],
+  // antonyms: [],
+  // misc: [],
+  // loanwords: [],
+  // dialects: [],
+  // associatedReadings: [],
+  // associatedWritings: []
+
+  return (
+    <li className="list-group-item">
+      <span className="lead"><strong>{props.translation.glossaries.join(', ')}</strong></span>
+      <Info info={props.translation.info} />
+      <Misc misc={props.translation.misc} />
+      <Fields fields={props.translation.fields} />
+      <Similar similar={props.translation.similar} />
+      <Antonyms antonyms={props.translation.antonyms} />
+      <Loanwords loanwords={props.translation.loanwords} />
+      <Dialects dialects={props.translation.dialects} />
+      <AssociatedReadings associatedReadings={props.translation.associatedReadings} />
+      <AssociatedWritings associatedWritings={props.translation.associatedWritings} />
+    </li>
+  );
+};
+
+var Info = function (props) {
+  return !props.info ? null : (
+    <div>
+      <button className="btn btn-secondary btn-sm">Info: {props.info.join(', ')}</button>
+    </div>
+  );
+};
+
+var Fields = function (props) {
+  return !props.fields ? null : (
+    <div>
+      <button className="btn btn-secondary btn-sm">Fields: {props.fields.join(', ')}</button>
+    </div>
+  );
+};
+
+var Misc = function (props) {
+  return !props.misc ? null : (
+    <div>
+      <button className="btn btn-secondary btn-sm">Misc: {props.misc.join(', ')}</button>
+    </div>
+  );
+};
+
+var Similar = function (props) {
+  return !props.similar ? null : (
+    <div>
+      <button className="btn btn-secondary btn-sm">Similar: {props.similar.join(', ')}</button>
+    </div>
+  );
+};
+
+var Antonyms = function (props) {
+  return !props.antonyms ? null : (
+    <div>
+      <button className="btn btn-secondary btn-sm">Antonyms: {props.antonyms.join(', ')}</button>
+    </div>
+  );
+};
+
+var Loanwords = function (props) {
+  return !props.loanwords ? null : (
+    <div>
+      <button className="btn btn-secondary btn-sm">Loanwords: {props.misc.join(', ')}</button>
+    </div>
+  );
+};
+
+var Dialects = function (props) {
+  return !props.dialects ? null : (
+    <div>
+      <button className="btn btn-secondary btn-sm">Dialects: {props.dialects.join(', ')}</button>
+    </div>
+  );
+};
+
+var AssociatedReadings = function (props) {
+  return !props.associatedReadings ? null : (
+    <div>
+      <button className="btn btn-secondary btn-sm">
+        Associated Readings: {props.associatedReadings.join(', ')}
+      </button>
+    </div>
+  );
+};
+
+var AssociatedWritings = function (props) {
+  return !props.associatedWritings ? null : (
+    <div>
+      <button className="btn btn-secondary btn-sm">
+        Associated Writings: {props.associatedWritings.join(', ')}
+      </button>
+    </div>
+  );
 };
 
 class App extends Component {
