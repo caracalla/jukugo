@@ -90,44 +90,37 @@ var parseReadingElement = function (readingElement) {
   return readingObject;
 };
 
-var parseSenseElement = function (senseElement) {
-  var senseObject = {};
+var parseSenses = function (senses) {
+  var output = [];
+  var currentSense;
+  var currentTranslation;
 
-  if (Array.isArray(senseElement.pos)) {
-    senseObject.partsOfSpeech = senseElement.pos;
-  }
-  if (Array.isArray(senseElement.gloss)) {
-    senseObject.translations = senseElement.gloss;
-  }
-  if (Array.isArray(senseElement.s_inf)) {
-    senseObject.info = senseElement.s_inf;
-  }
-  if (Array.isArray(senseElement.field)) {
-    senseObject.fields = senseElement.field;
-  }
-  if (Array.isArray(senseElement.xref)) {
-    senseObject.similar = senseElement.xref;
-  }
-  if (Array.isArray(senseElement.ant)) {
-    senseObject.antonyms = senseElement.ant;
-  }
-  if (Array.isArray(senseElement.misc)) {
-    senseObject.misc = senseElement.misc;
-  }
-  if (Array.isArray(senseElement.lsource)) {
-    senseObject.loanwords = senseElement.lsource;
-  }
-  if (Array.isArray(senseElement.dial)) {
-    senseObject.dialects = senseElement.dial;
-  }
-  if (Array.isArray(senseElement.stagr)) {
-    senseObject.associatedReadings = senseElement.stagr;
-  }
-  if (Array.isArray(senseElement.stagk)) {
-    senseObject.associatedWritings = senseElement.stagk;
-  }
+  senses.forEach(function (sense) {
+  	currentTranslation = {};
 
-  return senseObject;
+  	if (Array.isArray(sense.pos)) {
+      if (currentSense) { output.push(currentSense) }
+
+      currentSense = { partsOfSpeech: sense.pos, translations: [] }
+    }
+
+    if (Array.isArray(sense.gloss)) { currentTranslation.glossaries = sense.gloss }
+    if (Array.isArray(sense.s_inf)) { currentTranslation.info = sense.s_inf }
+    if (Array.isArray(sense.field)) { currentTranslation.fields = sense.field }
+    if (Array.isArray(sense.xref)) { currentTranslation.similar = sense.xref }
+    if (Array.isArray(sense.ant)) { currentTranslation.antonyms = sense.ant }
+    if (Array.isArray(sense.misc)) { currentTranslation.misc = sense.misc }
+    if (Array.isArray(sense.lsource)) { currentTranslation.loanwords = sense.lsource }
+    if (Array.isArray(sense.dial)) { currentTranslation.dialects = sense.dial }
+    if (Array.isArray(sense.stagr)) { currentTranslation.associatedReadings = sense.stagr }
+    if (Array.isArray(sense.stagk)) { currentTranslation.associatedWritings = sense.stagk }
+
+    currentSense.translations.push(currentTranslation);
+  });
+
+  output.push(currentSense);
+
+  return output;
 };
 
 var storeEntry = function (entry) {
@@ -140,7 +133,7 @@ var storeEntry = function (entry) {
     entryObject.readings = entry.r_ele.map(parseReadingElement);
   }
   if (Array.isArray(entry.sense)) {
-    entryObject.senses = entry.sense.map(parseSenseElement);
+    entryObject.senses = parseSenses(entry.sense);
   }
 
   return entryObject;
