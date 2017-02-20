@@ -7,12 +7,10 @@ A tool for learning Japanese.  Select words made up of kanji of various kyōiku 
 1. Download and unzip JMdict_e.gz from the [Monash Nihongo ftp Archive][monash-ftp]
 2. Run `./sanitize_jmdict.sh` (should take around 10 minutes (there's definitely a better way to do this))
 3. With MongoDB running, run `node populate_database.js` (requires at least 1 GB of RAM)
-4. `yarn start` to start the server
+4. Run `yarn start` in the top level directory to start the server
+5. Run `yarn start` in the client directory to start the client
 
 ## TODO
-* Sort results by "priority"
-* Implement Backbone frontend
-* Find a frequency list and update the priority values accordingly, or add a new field
-* Find all words containing a particular kanji within a grade
+* Implement form to select grade and other parameters
 
 [monash-ftp]: http://ftp.monash.edu.au/pub/nihongo/JMdict_e.gz
