@@ -7,7 +7,7 @@ var db;
 
 app.use(cors());
 
-app.get('/', function (req, res) {
+app.get('/entries', function (req, res) {
   // Replace these with request parameters
   var grade = 1;
   var page = 1;
