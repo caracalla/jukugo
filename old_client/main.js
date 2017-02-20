@@ -2,7 +2,7 @@
   'use strict';
 
   var main = $("#main");
-  var url = "http://api.jukugo.tech";
+  var url = "http://api.jukugo.tech/entries";
 
   var entryTemplate =
     '<div class="row">'
