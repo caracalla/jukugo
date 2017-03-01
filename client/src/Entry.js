@@ -38,7 +38,7 @@ var Sense = function (props) {
     var SubField = function(props) {
       return !props.data ? null : (
         <div>
-          <span className="btn btn-secondary btn-sm">{props.name}: {props.data.join(', ')}</span>
+          <span className="badge badge-danger">{props.name}: {props.data.join(', ')}</span>
         </div>
       );
     };
@@ -72,6 +72,7 @@ class Entry extends Component {
   render() {
     return (
       <div className="row">
+        <div className="col-lg-4">
           <ul className="nav nav-pills">
             {this.props.entry.writings.map(function (writing) {
               return (
@@ -81,19 +82,24 @@ class Entry extends Component {
               );
             })}
           </ul>
-        <ul className="list-inline">
-          {this.props.entry.readings.map(function (reading) {
-            return (
-              <li className="list-inline-item" key={reading.kana}>
-                <Reading reading={reading} />
-              </li>
-            );
-          })}
-        </ul>
+        </div>
+        <div className="col-lg-2">
+          <ul className="list-inline">
+            {this.props.entry.readings.map(function (reading) {
+              return (
+                <li className="list-inline-item" key={reading.kana}>
+                  <Reading reading={reading} />
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+        <div className="col-lg-6">
           {this.props.entry.senses.map(function (sense) {
             return <Sense sense={sense} />
           })}
-        <br /><hr /><br />
+          <br /><hr /><br />
+        </div>
       </div>
     );
   };
