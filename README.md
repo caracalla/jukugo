@@ -11,8 +11,16 @@ A tool for learning Japanese.  Select words made up of kanji of various kyōiku 
 5. Run `yarn start` in the client directory to start the client
 
 ## TODO
-* Implement form to select grade and other parameters
 * Spin up api server and live public client
-* Clean up `sanitize_jmdict` with a real sed or awk script
+
+* On the server:
+  * Replace `sanitize_jmdict` with a real sed or awk script
+  * Handle valid query strings and pagination
+
+* On the client:
+  * Implement form to select grade and other parameters
+  * Use custom CSS for readings and writings instead of jury-rigging bootstrap classes
+  * Integrate stroke order font (tooltips? modals?)
+>>>>>>> 81ca07aa66a233bc17974d4543ff4756f694d300
 
 [monash-ftp]: http://ftp.monash.edu.au/pub/nihongo/JMdict_e.gz
