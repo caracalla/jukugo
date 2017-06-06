@@ -12,5 +12,7 @@ A tool for learning Japanese.  Select words made up of kanji of various kyōiku 
 
 ## TODO
 * Implement form to select grade and other parameters
+* Spin up api server and live public client
+* Clean up `sanitize_jmdict` with a real sed or awk script
 
 [monash-ftp]: http://ftp.monash.edu.au/pub/nihongo/JMdict_e.gz

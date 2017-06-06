@@ -7,28 +7,38 @@ var db;
 
 app.use(cors());
 
-app.get('/entries', function (req, res) {
+app.get('/entries', function (request, response) {
   // Replace these with request parameters
   var grade = 1;
-  var page = 1;
+  var page = request.query.page || 1;
   var pageSize = 50;
   var findQuery = { "writings.grade": { $exists: true, $eq: grade }, "writings.frequencyRating": { $exists: true } };
   var sortQuery = { "writings.priority": -1 };
+  
+  var writing = request.query.writing;
+  var reading = request.query.reading;
+  var translation = request.query.translation;
+
+  if (translation) {
+    findQuery["senses.translations.glossaries"] = translation;
+  }
+
+  console.log(JSON.stringify(request.query));
 
   // db.entries.find({"writings.grade": {$exists: true, $eq: grade}}).skip(pagesize * (page - 1)).limit(pagesize);
   // result = db.entries.find({"writings.grade": {$exists: true, $eq: grade}}).limit(50);
   db.collection('entries', function (err, entries) {
     if (err) { throw err; }
 
-    // entries.find(query).skip(pageSize * (page - 1)).limit(pageSize).toArray(function (err, entries) {
-    entries.find(findQuery).sort(sortQuery).limit(pageSize).toArray(function (err, entries) {
+    entries.find(findQuery).sort(sortQuery).skip(pageSize * (page - 1)).limit(pageSize).toArray(function (err, entries) {
+    // entries.find(findQuery).sort(sortQuery).limit(pageSize).toArray(function (err, entries) {
       if (err) { throw err; }
 
-      res.json(entries);
+      response.json(entries);
     })
   })
 
-  console.log(req.ip);
+  console.log(request.ip);
 })
 
 MongoClient.connect(mongoURL, function (err, database) {

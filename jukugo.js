@@ -1,3 +1,5 @@
+// This file is only around for testing purposes
+
 console.log("今日は！");
 
 var MongoClient = require('mongodb').MongoClient
