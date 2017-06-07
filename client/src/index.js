@@ -4,13 +4,29 @@ import App from './App';
 import './index.css';
 import $ from 'jquery';
 
-var url = "http://api.jukugo.tech/entries";
+var jukugo = {
+  baseURL: "http://api.jukugo.tech/entries",
 
-$("document").ready(function() {
-  $.get(url, function (response) {
+  render: function (entries) {
     ReactDOM.render(
-      <App entries={response} />,
+      <App entries={entries} />,
       document.getElementById('root')
     );
-  })
+  },
+
+  getEntries: function (queryString) {
+    var url = this.baseURL + queryString;
+
+    $.get(url, this.render);
+  },
+
+  log: function (text) {
+    console.log(text);
+  }
+};
+
+$("document").ready(function () {
+  jukugo.getEntries(document.location.search);
 });
+
+export default jukugo;

@@ -61,7 +61,12 @@ var Sense = function (props) {
       </div>
       <ul className="list-group list-group-flush">
         {props.sense.translations.map(function (translation) {
-          return <Translation translation={translation} />
+          // return <Translation translation={translation} />
+          return (
+            <span key={translation.glossaries[0]}>
+              <Translation translation={translation} />
+            </span>
+          );
         })}
       </ul>
     </div>
@@ -96,7 +101,12 @@ class Entry extends Component {
         </div>
         <div className="col-lg-6">
           {this.props.entry.senses.map(function (sense) {
-            return <Sense sense={sense} />
+            // return <Sense sense={sense} />
+            return (
+              <span key={sense.translations[0].glossaries[0]}>
+                <Sense sense={sense} />
+              </span>
+            );
           })}
           <br /><hr /><br />
         </div>
