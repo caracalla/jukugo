@@ -8,22 +8,34 @@ var db;
 app.use(cors());
 
 app.get('/entries', function (request, response) {
-  // Replace these with request parameters
-  var grade = 1;
+  var grades = [1];
+
+  if (request.query.grades) {
+    grades = request.query.grades.split(",").map(function (string) {
+      return parseInt(string);
+    });
+  }
+
   var page = request.query.page || 1;
   var pageSize = 50;
-  var findQuery = { "writings.grade": { $exists: true, $eq: grade }, "writings.frequencyRating": { $exists: true } };
+  var findQuery = { "writings.grade": { $exists: true, $in: grades }, "writings.frequencyRating": { $exists: true } };
   var sortQuery = { "writings.priority": -1 };
-  
-  var writing = request.query.writing;
-  var reading = request.query.reading;
-  var translation = request.query.translation;
 
-  if (translation) {
-    findQuery["senses.translations.glossaries"] = translation;
+
+  if (request.query.writing) {
+    findQuery["writings.kanji"] = new RegExp(request.query.writing);
+  }
+
+  if (request.query.reading) {
+    findQuery["readings.kana"] = new RegExp(request.query.reading, "i");
+  }
+
+  if (request.query.translation) {
+    findQuery["senses.translations.glossaries"] = new RegExp(request.query.translation, "i");
   }
 
   console.log(JSON.stringify(request.query));
+  console.log(JSON.stringify(findQuery))
 
   // db.entries.find({"writings.grade": {$exists: true, $eq: grade}}).skip(pagesize * (page - 1)).limit(pagesize);
   // result = db.entries.find({"writings.grade": {$exists: true, $eq: grade}}).limit(50);
