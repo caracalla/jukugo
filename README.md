@@ -21,6 +21,5 @@ A tool for learning Japanese.  Select words made up of kanji of various kyōiku 
   * Implement form to select grade and other parameters
   * Use custom CSS for readings and writings instead of jury-rigging bootstrap classes
   * Integrate stroke order font (tooltips? modals?)
->>>>>>> 81ca07aa66a233bc17974d4543ff4756f694d300
 
 [monash-ftp]: http://ftp.monash.edu.au/pub/nihongo/JMdict_e.gz

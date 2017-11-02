@@ -7,9 +7,9 @@ class App extends Component {
     return (
       <div className="container">
         <SearchForm />
-        <hr />
+        <hr className="main-separator" />
         {this.props.entries.map(function (entry) {
-          return <div key={entry._id}><Entry entry={entry} /></div>;
+          return <div key={entry._id}><Entry entry={entry} /><br/></div>;
         })}
       </div>
     );

@@ -1,27 +1,32 @@
 import React, { Component } from 'react';
 
 var Writing = function (props) {
-  var pClass = props.writing.priority ? "nav-link active bg-danger" : "nav-link text-danger";
+  var classNames = props.writing.priority ? "kanji btn-lg btn btn-danger" : "kanji btn btn-lg btn-secondary";
 
   return (
-    <div>
-      <h1 className="display-4 hidden-sm-down">
-        <p className={pClass}>{props.writing.kanji}</p>
-      </h1>
-      <h1 className="display-6 hidden-md-up">
-        <p className={pClass}>{props.writing.kanji}</p>
-      </h1>
-    </div>
+    <span
+      className={classNames}
+      data-toggle="modal"
+      data-target="#kanji-stroke-order-modal"
+      data-kanji={props.writing.kanji}
+      key={props.writing.kanji}
+      // FIXME: this is shitty
+      onClick={function (event) { document.getElementById('kanji-stroke-order').innerHTML = event.target.dataset.kanji }}
+    >{props.writing.kanji}</span>
   );
 };
 
 var Reading = function (props) {
-  var pClass = props.reading.priority ? "btn btn-danger" : "btn btn-outline-danger";
+  var classNames = props.reading.priority ? "kana btn-lg btn btn-danger" : "kana btn btn-lg btn-secondary";
 
-  return <p className={pClass}>{props.reading.kana}</p>;
+  return <span className={classNames} key={props.reading.kana}>{props.reading.kana}</span>;
 };
 
 var Sense = function (props) {
+  var PartOfSpeech = function (props) {
+    return <p className="part-of-speech small">{props.partOfSpeech}</p>;
+  };
+
   var Translation = function (props) {
     const subFields = [
       "info",
@@ -38,78 +43,72 @@ var Sense = function (props) {
     var SubField = function(props) {
       return !props.data ? null : (
         <div>
-          <span className="badge badge-danger">{props.name}: {props.data.join(', ')}</span>
+          <p className="badge badge-danger">{props.name}: {props.data.join(', ')}</p>
         </div>
       );
     };
 
-    return (
-      <li className="list-group-item">
-        <span className="lead"><strong>{props.translation.glossaries.join(', ')}</strong></span>
+    var Glossary = function (props) {
+      return (
+        <li className="list-group-item glossary">
+          {props.glossary}
 
-        {subFields.map(function (fieldName) {
-          return <SubField data={props.translation[fieldName]} name={fieldName} key={fieldName} />
+          {/* {subFields.map(function (fieldName) {
+            return <SubField data={props.translation[fieldName]} name={fieldName} key={fieldName} />
+          })} */}
+        </li>
+      );
+    };
+
+    return (
+      <ul className="list-group list-group-flush">
+        {props.translation.glossaries.map(function (glossary) {
+          return <Glossary glossary={glossary} key={glossary} />;
         })}
-      </li>
+      </ul>
     );
   };
 
   return (
-    <div className="card">
-      <div className="card-header">
-        <h4 className="card-title">{props.sense.partsOfSpeech.join(', ')}</h4>
-      </div>
-      <ul className="list-group list-group-flush">
-        {props.sense.translations.map(function (translation) {
-          // return <Translation translation={translation} />
-          return (
-            <span key={translation.glossaries[0]}>
-              <Translation translation={translation} />
-            </span>
-          );
+    <li className="list-group-item">
+      <div className="col-4 pos-column">
+        {props.sense.partsOfSpeech.map(function (partOfSpeech) {
+          return <PartOfSpeech partOfSpeech={partOfSpeech} />;
         })}
-      </ul>
-    </div>
+      </div>
+
+      <div className="col-8">
+        <div className="card">
+          {props.sense.translations.map(function (translation) {
+            return <Translation translation={translation} />;
+          })}
+        </div>
+      </div>
+    </li>
   );
 };
 
 class Entry extends Component {
   render() {
     return (
-      <div className="row">
-        <div className="col-lg-4">
-          <ul className="nav nav-pills">
+      <div className="card" id={this.props.entry._id}>
+        <div className="card-header">
             {this.props.entry.writings.map(function (writing) {
-              return (
-                <li className="nav-item" key={writing.kanji}>
-                  <Writing writing={writing} />
-                </li>
-              );
+              return <Writing writing={writing} key={writing.kanji} />;
             })}
-          </ul>
         </div>
-        <div className="col-lg-2">
-          <ul className="list-inline">
+
+        <ul className="list-group list-group-flush">
+          <li className="list-group-item">
             {this.props.entry.readings.map(function (reading) {
-              return (
-                <li className="list-inline-item" key={reading.kana}>
-                  <Reading reading={reading} />
-                </li>
-              );
+              return <Reading reading={reading} key={reading.kana} />;
             })}
-          </ul>
-        </div>
-        <div className="col-lg-6">
+          </li>
+
           {this.props.entry.senses.map(function (sense) {
-            // return <Sense sense={sense} />
-            return (
-              <span key={sense.translations[0].glossaries[0]}>
-                <Sense sense={sense} />
-              </span>
-            );
+            return <Sense sense={sense} />
           })}
-          <br /><hr /><br />
-        </div>
+        </ul>
       </div>
     );
   };

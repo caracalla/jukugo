@@ -8,12 +8,13 @@ class SearchForm extends Component {
       writing: "",
       reading: "",
       translation: "",
-      grades: "",
+      grades: []
     };
 
     this.handleWritingChange = this.handleWritingChange.bind(this);
     this.handleReadingChange = this.handleReadingChange.bind(this);
     this.handleTranslationChange = this.handleTranslationChange.bind(this);
+    this.handleGradesChange = this.handleGradesChange.bind(this);
     this.onSubmit = this.onSubmit.bind(this);
   }
 
@@ -27,6 +28,26 @@ class SearchForm extends Component {
 
   handleTranslationChange(event) {
     this.setState({translation: event.target.value});
+  }
+
+  handleGradesChange(event) {
+    var grade = event.target.value
+
+    if (event.target.checked) {
+      if (!this.state.grades.includes(grade)) {
+        this.setState(function (state) {
+          return {grades: state.grades.concat(grade)};
+        })
+      }
+    } else {
+      this.setState(function (state) {
+        while (state.grades.indexOf(grade) !== -1) {
+          state.grades.splice(state.grades.indexOf(grade), 1);
+        }
+
+        return {grades: state.grades};
+      })
+    }
   }
 
   onSubmit(event) {
@@ -51,21 +72,39 @@ class SearchForm extends Component {
             <div className="form-group row">
               <label className="lead col-md-2 col-form-label">Writing</label>
               <div className="col-md-10">
-                <input type="text" id="writingSearch" className="form-control" value={this.state.writing} onChange={this.handleWritingChange} />
+                <input
+                  type="text"
+                  id="writingSearch"
+                  className="form-control"
+                  value={this.state.writing}
+                  onChange={this.handleWritingChange}
+                />
               </div>
             </div>
 
             <div className="form-group row">
               <label className="lead col-md-2 col-form-label">Reading</label>
               <div className="col-md-10">
-                <input type="text" id="readingSearch" className="form-control" value={this.state.reading} onChange={this.handleReadingChange} />
+                <input
+                  type="text"
+                  id="readingSearch"
+                  className="form-control"
+                  value={this.state.reading}
+                  onChange={this.handleReadingChange}
+                />
               </div>
             </div>
 
             <div className="form-group row">
               <label className="lead col-md-2 col-form-label">Translation</label>
               <div className="col-md-10">
-                <input type="text" id="translationSearch" className="form-control" value={this.state.translation} onChange={this.handleTranslationChange} />
+                <input
+                  type="text"
+                  id="translationSearch"
+                  className="form-control"
+                  value={this.state.translation}
+                  onChange={this.handleTranslationChange}
+                />
               </div>
             </div>
 
@@ -85,6 +124,7 @@ class SearchForm extends Component {
                           id="checkGrade1"
                           value="1"
                           name="grades"
+                          onChange={this.handleGradesChange}
                         /> 1
                       </label>
                     </div>
@@ -99,6 +139,7 @@ class SearchForm extends Component {
                           id="checkGrade2"
                           value="2"
                           name="grades"
+                          onChange={this.handleGradesChange}
                         /> 2
                       </label>
                     </div>
@@ -113,6 +154,7 @@ class SearchForm extends Component {
                           id="checkGrade3"
                           value="3"
                           name="grades"
+                          onChange={this.handleGradesChange}
                         /> 3
                       </label>
                     </div>
@@ -127,6 +169,7 @@ class SearchForm extends Component {
                           id="checkGrade4"
                           value="4"
                           name="grades"
+                          onChange={this.handleGradesChange}
                         /> 4
                       </label>
                     </div>
@@ -141,6 +184,7 @@ class SearchForm extends Component {
                           id="checkGrade5"
                           value="5"
                           name="grades"
+                          onChange={this.handleGradesChange}
                         /> 5
                       </label>
                     </div>
@@ -155,6 +199,7 @@ class SearchForm extends Component {
                           id="checkGrade6"
                           value="6"
                           name="grades"
+                          onChange={this.handleGradesChange}
                         /> 6
                       </label>
                     </div>

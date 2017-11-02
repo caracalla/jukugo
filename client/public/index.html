@@ -16,12 +16,95 @@
   <body>
 
     <br/>
+
+    <div class="modal fade" id="kanji-stroke-order-modal" tabindex="-1">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Kanji Stroke Order</h5>
+            <button type="button" class="close" data-dismiss="modal">
+              <span>&times;</span>
+            </button>
+          </div>
+          <div class="modal-body text-center">
+            <span id="kanji-stroke-order"></span>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+<!--
+    <div class="container">
+      <h1 class="display1">BEGIN TEMPLATE</h1>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="kanji priority btn-lg btn btn-danger" data-toggle="modal" data-target="#kanji-stroke-order-modal" data-whatever="@mdo">黄金</span>
+          <span class="kanji btn btn-lg btn-secondary">金</span>
+        </div>
+
+        <ul class="list-group list-group-flush">
+          <li class="list-group-item">
+            <span class="kana priority btn-lg btn btn-danger">おうごん</span>
+            <span class="kana priority btn-lg btn btn-danger">こがね</span>
+            <span class="kana btn btn-lg btn-secondary">きがね</span>
+            <span class="kana btn btn-lg btn-secondary">くがね</span>
+          </li>
+
+          <li class="list-group-item">
+            <div class="col-4 pos-column">
+              <p class="part-of-speech small">noun (common) (futsuumeishi)</p>
+              <p class="part-of-speech small">nouns which may take the genitive case particle 'no'</p>
+            </div>
+
+            <div class="col-8">
+              <div class="card">
+                <ul class="list-group list-group-flush">
+                  <li class="list-group-item glossary">
+                    <p>gold is a precious metal</p>
+                    <p class="badge badge-danger">something</p>
+                  </li>
+                  <li class="list-group-item">Dapibus ac facilisis in</li>
+                  <li class="list-group-item">Vestibulum at eros</li>
+                </ul>
+              </div>
+            </div>
+          </li>
+
+          <li class="list-group-item">
+            <div class="col-4 pos-column">
+              <p class="part-of-speech small">noun (common) (futsuumeishi)</p>
+              <p class="part-of-speech small">nouns which may take the genitive case particle 'no'</p>
+            </div>
+
+            <div class="col-8">
+              <div class="card">
+                <ul class="list-group list-group-flush">
+                  <li class="list-group-item glossary">
+                    <p>gold is a precious metal</p>
+                    <p class="badge badge-danger">something</p>
+                  </li>
+                  <li class="list-group-item">Dapibus ac facilisis in</li>
+                  <li class="list-group-item">Vestibulum at eros</li>
+                </ul>
+              </div>
+            </div>
+          </li>
+        </ul>
+      </div>
+
+      <h1 class="display1">END TEMPLATE</h1>
+
+      <hr>
+    </div>
+-->
     <div id="root"></div>
 
     <!-- jQuery first, then Tether, then Bootstrap JS. -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js" integrity="sha384-3ceskX3iaEnIogmQchP8opvBy3Mi7Ce34nWjpBIwVTHfGYWQS9jwHDVRnpKKHJg7" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
-    <!-- <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.5/js/bootstrap.min.js" integrity="sha384-BLiI7JTZm+JWlgKa0M0kGRpJbF2J8q+qreVrKBC47e3K6BW78kGLrCkeRX6I9RoK" crossorigin="anonymous"></script> -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mustache.js/2.3.0/mustache.min.js" integrity="sha256-iaqfO5ue0VbSGcEiQn+OeXxnxAMK2+QgHXIDA5bWtGI=" crossorigin="anonymous"></script>
   </body>
