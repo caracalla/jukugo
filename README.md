@@ -4,6 +4,8 @@ A tool for learning Japanese.  Select words made up of kanji of various kyōiku 
 
 ## Setup
 
+**NOTE**: `yarn install` won't work with Node 10 for some reason, so use Node 8 LTS.
+
 1. Download and unzip JMdict_e.gz from the [Monash Nihongo ftp Archive][monash-ftp]
 2. Run `./sanitize_jmdict.sh` (should take around 10 minutes (there's definitely a better way to do this))
 3. With MongoDB running, run `node populate_database.js` (requires at least 1 GB of RAM)
@@ -25,6 +27,5 @@ A tool for learning Japanese.  Select words made up of kanji of various kyōiku 
 * On the client:
   * Use custom CSS for readings and writings instead of jury-rigging Bootstrap classes
     * I've got a better solution in place now but I'd still like to use a mostly-custom solution instead of relying so heavily on Bootstrap.
-  * Integrate stroke order font (tooltips? modals?)
 
 [monash-ftp]: http://ftp.monash.edu.au/pub/nihongo/JMdict_e.gz

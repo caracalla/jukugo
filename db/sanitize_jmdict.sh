@@ -180,3 +180,6 @@ sed -i "s/&lt;/lt/g" JMdict_e
 sed -i "s/&gt;/gt/g" JMdict_e
 # Finally, remove any straggling semicolons used for grammatical reasons
 sed -i "s/;/,/g" JMdict_e
+
+# also the ampersands
+sed -i "s/&//g" JMdict_e
