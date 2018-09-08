@@ -1,1 +1,5 @@
 JMdict_e
+
+node_modules
+
+*.swp
