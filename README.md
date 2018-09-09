@@ -6,6 +6,7 @@ A tool for learning Japanese.  Select words made up of kanji of various kyōiku 
 
 This guide assumes you're using a Debian machine with at least 1 GB of RAM.
 
+### Setting up the environment
 1. Install nvm - https://github.com/creationix/nvm#git-install
 1. Install node LTS:
     ```sh
@@ -16,6 +17,8 @@ This guide assumes you're using a Debian machine with at least 1 GB of RAM.
     * This may be necessary https://askubuntu.com/questions/104160/
 1. Install MongoDB - https://docs.mongodb.com/manual/tutorial/install-mongodb-on-debian/
 1. `service mongod start`
+
+### Setting up the server
 1. `cd jukugo/db`
 1. Download JMdict_e.gz from the [Monash Nihongo ftp Archive][monash-ftp]
     ```sh
@@ -24,10 +27,14 @@ This guide assumes you're using a Debian machine with at least 1 GB of RAM.
     ```
 1. Run `./sanitize_jmdict.sh`
     * This currently takes up to an hour.  There's definitely a better way to do this.
+1. Run `yarn install` in the root directory of this repository
 1. `node populate_database.js`
-1. Run `yarn start` in the root directory of this repository to start the server
+1. `yarn start`
+
+### Setting up the client
+1. Run `yarn install` in the `client` directory
 1. Change `basURL` of the server in `client/src/index.js` to the address of the server
-1. Run `yarn start` in the `client` directory to start the client
+1. `yarn start`
 
 ## TODO
 * Spin up api server and live public client
