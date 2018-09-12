@@ -24,6 +24,14 @@ var freqlistKeys = Object.keys(freqlist);
 // var grade_5 = { kanji: grade_5_kanji, full_set: grade_5_kanji.concat(grade_4.full_set) };
 // var grade_6 = { kanji: grade_6_kanji, full_set: grade_6_kanji.concat(grade_5.full_set) };
 
+var isKanji = function (character) {
+  var lowKanjiCodePoint = 19968;    // 4E00
+  var highKanjiCodePoint =  40895;  // 9FBF
+  var codePoint = character.codePointAt(0);
+
+  return (codePoint >= lowKanjiCodePoint && codePoint <= highKanjiCodePoint);
+}
+
 var determineGradeLevel = function (writing) {
   var onlyKanji = true;
   var gradeLevel = null;
@@ -31,24 +39,24 @@ var determineGradeLevel = function (writing) {
   var characters = writing.kanji.split('');
 
   characters.forEach(function (character) {
-    if (!gradeLevel && grade_1_kanji.includes(character)) {
-      gradeLevel = 1;
+    if (isKanji(character)) {
       kanjiCount += 1;
-    } else if ((!gradeLevel || gradeLevel < 2) && grade_2_kanji.includes(character)) {
-      gradeLevel = 2;
-      kanjiCount += 1;
-    } else if ((!gradeLevel || gradeLevel < 3) && grade_3_kanji.includes(character)) {
-      gradeLevel = 3;
-      kanjiCount += 1;
-    } else if ((!gradeLevel || gradeLevel < 4) && grade_4_kanji.includes(character)) {
-      gradeLevel = 4;
-      kanjiCount += 1;
-    } else if ((!gradeLevel || gradeLevel < 5) && grade_5_kanji.includes(character)) {
-      gradeLevel = 5;
-      kanjiCount += 1;
-    } else if ((!gradeLevel || gradeLevel < 6) && grade_6_kanji.includes(character)) {
-      gradeLevel = 6;
-      kanjiCount += 1;
+
+      if (!gradeLevel && grade_1_kanji.includes(character)) {
+        gradeLevel = 1;
+      } else if ((!gradeLevel || gradeLevel < 2) && grade_2_kanji.includes(character)) {
+        gradeLevel = 2;
+      } else if ((!gradeLevel || gradeLevel < 3) && grade_3_kanji.includes(character)) {
+        gradeLevel = 3;
+      } else if ((!gradeLevel || gradeLevel < 4) && grade_4_kanji.includes(character)) {
+        gradeLevel = 4;
+      } else if ((!gradeLevel || gradeLevel < 5) && grade_5_kanji.includes(character)) {
+        gradeLevel = 5;
+      } else if ((!gradeLevel || gradeLevel < 6) && grade_6_kanji.includes(character)) {
+        gradeLevel = 6;
+      } else {
+        gradeLevel = 99; // stupid
+      }
     } else {
       onlyKanji = false;
     }
@@ -58,7 +66,7 @@ var determineGradeLevel = function (writing) {
     writing.onlyKanji = true;
   }
 
-  if (gradeLevel) {
+  if (gradeLevel && gradeLevel <= 6) {
     writing.grade = gradeLevel;
   }
 
