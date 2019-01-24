@@ -25,7 +25,7 @@ var determineGradeLevel = function (writing) {
     if (isKanji(character)) {
       kanjiCount += 1;
 
-      if (!gradeLevel && kanjiByGrade.grade1.includes(character)) {
+      if ((!gradeLevel || gradeLevel == 1) && kanjiByGrade.grade1.includes(character)) {
         gradeLevel = 1;
       } else if ((!gradeLevel || gradeLevel < 2) && kanjiByGrade.grade2.includes(character)) {
         gradeLevel = 2;
@@ -154,7 +154,7 @@ var parseData = function (db, callback) {
       if (err) { throw err; }
 
       db.collection('entries').drop(function (err, result) {
-        if (err) { throw err; }
+        // don't care if this fails
       });
 
       // parse each entry
@@ -167,6 +167,8 @@ var parseData = function (db, callback) {
 
 MongoClient.connect(mongoURL, function (err, db) {
   if (err) { throw err; }
+
+  console.log('connected!');
 
   parseData(db, function(err, dbResult) {
     if (err) { throw err; }
