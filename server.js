@@ -8,47 +8,81 @@ var db;
 app.use(cors());
 
 app.get('/entries', function (request, response) {
-  var grades = [1];
-
-  if (request.query.grades) {
-    grades = request.query.grades.split(",").map(function (string) {
-      return parseInt(string);
-    });
-  }
-
   var page = request.query.page || 1;
   var pageSize = 50;
-  var findQuery = { "writings.grade": { $exists: true, $in: grades }, "writings.frequencyRating": { $exists: true } };
-  var sortQuery = { "writings.priority": -1 };
+  // var findQuery = { "writings.grade": { $exists: true }, "writings.frequencyRating": { $exists: true } };
+	var findQuery = {
+		writings: {
+			$elemMatch: {
+				grade: {
+					$exists: true,
+					$lte: parseInt(request.query.grade)
+				},
+				priority: {
+					$gte: 1
+				},
+				frequencyRating: {
+					$exists: true
+				},
+				kanjiCount: {
+					$gte: 2
+				}
+			}
+		}
+	};
 
+  var sortQuery = { "writing.priority": -1, "writings.frequencyRating": 1 };
+
+	if (request.query.grade) {
+		findQuery.writings.$elemMatch.grade = {
+			$exists: true,
+			$lte: parseInt(request.query.grade)
+		};
+	}
+
+	if (request.query.onlyKanji) {
+		findQuery.writings.$elemMatch.onlyKanji = true;
+	}
 
   if (request.query.writing) {
-    findQuery["writings.kanji"] = new RegExp(request.query.writing);
+    findQuery.writings.kanji = new RegExp(request.query.writing);
   }
 
   if (request.query.reading) {
-    findQuery["readings.kana"] = new RegExp(request.query.reading, "i");
+    findQuery.readings.kana = new RegExp(request.query.reading, "i");
   }
 
   if (request.query.translation) {
-    findQuery["senses.translations.glossaries"] = new RegExp(request.query.translation, "i");
+    findQuery.senses.translations.glossaries = new RegExp(request.query.translation, "i");
   }
 
   console.log(JSON.stringify(request.query));
-  console.log(JSON.stringify(findQuery))
+  console.log(JSON.stringify(findQuery));
 
   // db.entries.find({"writings.grade": {$exists: true, $eq: grade}}).skip(pagesize * (page - 1)).limit(pagesize);
   // result = db.entries.find({"writings.grade": {$exists: true, $eq: grade}}).limit(50);
-  db.collection('entries', function (err, entries) {
+  db.collection('entries', function (err, collection) {
     if (err) { throw err; }
 
-    entries.find(findQuery).sort(sortQuery).skip(pageSize * (page - 1)).limit(pageSize).toArray(function (err, entries) {
-    // entries.find(findQuery).sort(sortQuery).limit(pageSize).toArray(function (err, entries) {
+		collection.count(findQuery, function (err, count) {
+			if (err) { throw err; }
+			entry_count = count;
+		});
+
+		// I don't remember why this is even here
+    // collection.find(findQuery).sort(sortQuery).skip(pageSize * (page - 1)).limit(pageSize).toArray(function (err, entries) {
+    collection.find(findQuery).sort(sortQuery).limit(pageSize).toArray(function (err, entries) {
       if (err) { throw err; }
 
-      response.json(entries);
-    })
-  })
+			var response_obj = {entries: entries};
+
+			collection.count(findQuery, function (err, count) {
+				if (err) { throw err; }
+				response_obj.count = count;
+				response.json(response_obj);
+			});
+    });
+  });
 
   console.log(request.ip);
 })
