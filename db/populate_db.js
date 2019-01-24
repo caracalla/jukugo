@@ -64,6 +64,8 @@ var parseKanjiElement = function (kanjiElement) {
 
   if (frequencyListKeys.includes(writing.kanji)) {
     writing.frequencyRating = frequencyList[writing.kanji];
+  } else {
+    writing.frequencyRating = 99999;
   }
 
   if (Array.isArray(kanjiElement.ke_pri)) {
