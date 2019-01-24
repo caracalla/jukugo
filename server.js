@@ -8,8 +8,12 @@ var db;
 app.use(cors());
 
 app.get('/entries', function (request, response) {
-  var page = request.query.page || 1;
-  var pageSize = 50;
+  var pageSize = 20;
+	var page = parseInt(request.query.page);
+
+	if (page < 1) {
+		page = 1;
+	}
 
   var findQuery = {
     writings: {
@@ -52,8 +56,6 @@ app.get('/entries', function (request, response) {
   console.log(JSON.stringify(request.query));
   console.log(JSON.stringify(findQuery));
 
-  // db.entries.find({"writings.grade": {$exists: true, $eq: grade}}).skip(pagesize * (page - 1)).limit(pagesize);
-  // result = db.entries.find({"writings.grade": {$exists: true, $eq: grade}}).limit(50);
   db.collection('entries', function (err, collection) {
     if (err) { throw err; }
 
@@ -62,9 +64,7 @@ app.get('/entries', function (request, response) {
       entry_count = count;
     });
 
-    // I don't remember why this is even here
-    // collection.find(findQuery).sort(sortQuery).skip(pageSize * (page - 1)).limit(pageSize).toArray(function (err, entries) {
-    collection.find(findQuery).sort(sortQuery).limit(pageSize).toArray(function (err, entries) {
+    collection.find(findQuery).sort(sortQuery).skip(pageSize * (page - 1)).limit(pageSize).toArray(function (err, entries) {
       if (err) { throw err; }
 
       var response_obj = {entries: entries};
