@@ -10,19 +10,12 @@ app.use(cors());
 app.get('/entries', function (request, response) {
   var page = request.query.page || 1;
   var pageSize = 50;
-  // var findQuery = { "writings.grade": { $exists: true }, "writings.frequencyRating": { $exists: true } };
+
 	var findQuery = {
 		writings: {
 			$elemMatch: {
-				grade: {
-					$exists: true,
-					$lte: parseInt(request.query.grade)
-				},
 				priority: {
 					$gte: 1
-				},
-				frequencyRating: {
-					$exists: true
 				},
 				kanjiCount: {
 					$gte: 2
