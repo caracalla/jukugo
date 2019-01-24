@@ -1,4 +1,4 @@
-# 熟語 - jukugo (this name is not the word I thought it was, so it will be changing)
+# 熟語 - jukugo
 
 A tool for learning Japanese.  Select words made up of kanji of various kyōiku grade levels, hiragana, katakana, and romaji.  For instance, if you are learning grades 1 and 2 of the kyōiku kanji, you can select words made up only of the kanji from those grades (as well as kana).
 
@@ -38,26 +38,20 @@ This guide assumes you're using a Debian machine with at least 1 GB of RAM.
 
 ## TODO
 * Spin up api server and live public client
+
 * On the server:
     * Replace `sanitize_jmdict` with a real sed or awk script and improve performance
-    * Handle valid query strings and pagination
+    * Handle pagination
     * Figure out a better way to sort the data such that the most commonly used and/or relevant terms are delivered first
-        * Sort by frequency, or by "priority"?
-        * Sort by grade level?
         * Take flags such as "obsolete term" and "word containing out-dated kanji" into account?
-    * Change default search behavior (should it start with an empty list?)
+
 * On the client:
-    * Change kanji grade level picker from checkboxes to dropdown
     * Add "kanji only" checkbox
     * Add ability to find words with X number of kanji, with two options:
         * Minimum X number of kanji
         * ONLY find words with X number of kanji
-    * Implement URL query strings
     * Reduce page clutter
         * Collapsible entries?
-    * "No entries found" indicator
     * Server communication error indicator
-    * Use custom CSS for readings and writings instead of jury-rigging Bootstrap classes
-        * I've got a better solution in place now but I'd still like to use a mostly-custom solution instead of relying so heavily on Bootstrap.
 
 [monash-ftp]: http://ftp.monash.edu.au/pub/nihongo/JMdict_e.gz
