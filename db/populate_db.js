@@ -2,6 +2,7 @@ var fs = require('fs');
 var parser = new require("xml2js").Parser({ ignoreAttrs: true });
 var MongoClient = require('mongodb').MongoClient;
 var mongoURL = 'mongodb://localhost:27017/jukugo';
+var JMdictFile = "JMdict_san";
 
 var kanjiByGrade = JSON.parse(fs.readFileSync('kanji_by_grade.json', 'utf8'));
 var frequencyList = JSON.parse(fs.readFileSync('frequency_list.json', 'utf8'));
@@ -145,9 +146,7 @@ var parseEntry = function (entry) {
 };
 
 var parseData = function (db, callback) {
-  var xmlFileName = "JMdict_e";
-
-  fs.readFile(xmlFileName, 'utf8', function (err, XMLData) {
+  fs.readFile(JMdictFile, 'utf8', function (err, XMLData) {
     if (err) { throw err; }
 
     parser.parseString(XMLData, function (err, result) {
