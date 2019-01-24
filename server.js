@@ -11,31 +11,31 @@ app.get('/entries', function (request, response) {
   var page = request.query.page || 1;
   var pageSize = 50;
 
-	var findQuery = {
-		writings: {
-			$elemMatch: {
-				priority: {
-					$gte: 1
-				},
-				kanjiCount: {
-					$gte: 2
-				}
-			}
-		}
-	};
+  var findQuery = {
+    writings: {
+      $elemMatch: {
+        priority: {
+          $gte: 1
+        },
+        kanjiCount: {
+          $gte: 2
+        }
+      }
+    }
+  };
 
   var sortQuery = { "writing.priority": -1, "writings.frequencyRating": 1 };
 
-	if (request.query.grade) {
-		findQuery.writings.$elemMatch.grade = {
-			$exists: true,
-			$lte: parseInt(request.query.grade)
-		};
-	}
+  if (request.query.grade) {
+    findQuery.writings.$elemMatch.grade = {
+      $exists: true,
+      $lte: parseInt(request.query.grade)
+    };
+  }
 
-	if (request.query.onlyKanji) {
-		findQuery.writings.$elemMatch.onlyKanji = true;
-	}
+  if (request.query.onlyKanji) {
+    findQuery.writings.$elemMatch.onlyKanji = true;
+  }
 
   if (request.query.writing) {
     findQuery.writings.kanji = new RegExp(request.query.writing);
@@ -57,23 +57,23 @@ app.get('/entries', function (request, response) {
   db.collection('entries', function (err, collection) {
     if (err) { throw err; }
 
-		collection.count(findQuery, function (err, count) {
-			if (err) { throw err; }
-			entry_count = count;
-		});
+    collection.count(findQuery, function (err, count) {
+      if (err) { throw err; }
+      entry_count = count;
+    });
 
-		// I don't remember why this is even here
+    // I don't remember why this is even here
     // collection.find(findQuery).sort(sortQuery).skip(pageSize * (page - 1)).limit(pageSize).toArray(function (err, entries) {
     collection.find(findQuery).sort(sortQuery).limit(pageSize).toArray(function (err, entries) {
       if (err) { throw err; }
 
-			var response_obj = {entries: entries};
+      var response_obj = {entries: entries};
 
-			collection.count(findQuery, function (err, count) {
-				if (err) { throw err; }
-				response_obj.count = count;
-				response.json(response_obj);
-			});
+      collection.count(findQuery, function (err, count) {
+        if (err) { throw err; }
+        response_obj.count = count;
+        response.json(response_obj);
+      });
     });
   });
 
