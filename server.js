@@ -9,11 +9,11 @@ app.use(cors());
 
 app.get('/entries', function (request, response) {
   var pageSize = 20;
-	var page = parseInt(request.query.page);
+  var page = parseInt(request.query.page);
 
-	if (page < 1) {
-		page = 1;
-	}
+  if (page < 1) {
+    page = 1;
+  }
 
   var findQuery = {
     writings: {
@@ -42,19 +42,19 @@ app.get('/entries', function (request, response) {
   }
 
   if (request.query.writing) {
-    findQuery.writings.kanji = new RegExp(request.query.writing);
+    findQuery['writings.kanji'] = new RegExp(request.query.writing);
   }
 
   if (request.query.reading) {
-    findQuery.readings.kana = new RegExp(request.query.reading, "i");
+    findQuery['readings.kana'] = new RegExp(request.query.reading, "i");
   }
 
   if (request.query.translation) {
-    findQuery.senses.translations.glossaries = new RegExp(request.query.translation, "i");
+    findQuery['senses.translations.glossaries'] = new RegExp(request.query.translation, "i");
   }
 
-  console.log(JSON.stringify(request.query));
-  console.log(JSON.stringify(findQuery));
+  console.log('client query: ' + JSON.stringify(request.query));
+  console.log('mongo query: ' + JSON.stringify(findQuery));
 
   db.collection('entries', function (err, collection) {
     if (err) { throw err; }
@@ -69,9 +69,11 @@ app.get('/entries', function (request, response) {
 
       var response_obj = {entries: entries};
 
-      collection.count(findQuery, function (err, count) {
+      collection.count(findQuery, function (err, total) {
         if (err) { throw err; }
-        response_obj.count = count;
+        response_obj.total_count = total;
+        console.log('results in page: ' + entries.length);
+        console.log('total results: ' + total + '\n');
         response.json(response_obj);
       });
     });
