@@ -28,15 +28,15 @@ var determineGradeLevel = function (writing) {
 
       if ((!gradeLevel || gradeLevel == 1) && kanjiByGrade.grade1.includes(character)) {
         gradeLevel = 1;
-      } else if ((!gradeLevel || gradeLevel < 2) && kanjiByGrade.grade2.includes(character)) {
+      } else if ((!gradeLevel || gradeLevel <= 2) && kanjiByGrade.grade2.includes(character)) {
         gradeLevel = 2;
-      } else if ((!gradeLevel || gradeLevel < 3) && kanjiByGrade.grade3.includes(character)) {
+      } else if ((!gradeLevel || gradeLevel <= 3) && kanjiByGrade.grade3.includes(character)) {
         gradeLevel = 3;
-      } else if ((!gradeLevel || gradeLevel < 4) && kanjiByGrade.grade4.includes(character)) {
+      } else if ((!gradeLevel || gradeLevel <= 4) && kanjiByGrade.grade4.includes(character)) {
         gradeLevel = 4;
-      } else if ((!gradeLevel || gradeLevel < 5) && kanjiByGrade.grade5.includes(character)) {
+      } else if ((!gradeLevel || gradeLevel <= 5) && kanjiByGrade.grade5.includes(character)) {
         gradeLevel = 5;
-      } else if ((!gradeLevel || gradeLevel < 6) && kanjiByGrade.grade6.includes(character)) {
+      } else if ((!gradeLevel || gradeLevel <= 6) && kanjiByGrade.grade6.includes(character)) {
         gradeLevel = 6;
       } else {
         gradeLevel = 99; // stupid
@@ -149,7 +149,7 @@ var parseData = function (db, callback) {
   fs.readFile(JMdictFile, 'utf8', function (err, XMLData) {
     if (err) { throw err; }
 
-    console.log('about to parse the data');
+    console.log('about to parse the xml');
 
     parser.parseString(XMLData, function (err, result) {
       if (err) { throw err; }
