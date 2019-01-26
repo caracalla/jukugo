@@ -2,6 +2,11 @@ import React, { Component } from 'react';
 
 var Writing = function (props) {
   var classNames = props.writing.priority ? "kanji btn-lg btn btn-danger" : "kanji btn btn-lg btn-secondary";
+  var kanjiText = props.writing.kanji;
+
+  if (props.writing.frequencyRating < 99999) {
+    kanjiText = `${kanjiText} (${props.writing.frequencyRating})`
+  }
 
   return (
     <span
@@ -12,7 +17,7 @@ var Writing = function (props) {
       key={props.writing.kanji}
       // FIXME: this is shitty
       onClick={function (event) { document.getElementById('kanji-stroke-order').innerHTML = event.target.dataset.kanji }}
-    >{props.writing.kanji}</span>
+    >{kanjiText}</span>
   );
 };
 

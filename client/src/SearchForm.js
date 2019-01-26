@@ -5,11 +5,14 @@ class SearchForm extends Component {
   constructor(props) {
     super(props);
 
+    var page = parseInt(this.props.query.page);
+
     this.state = {
       writing: this.props.query.writing || "",
       reading: this.props.query.reading || "",
       translation: this.props.query.translation || "",
-      grade: this.props.query.grade || "None"
+      grade: this.props.query.grade || "",
+      page: page > 0 ? page : 1
     };
 
     this.handleWritingChange = this.handleWritingChange.bind(this);
@@ -17,6 +20,8 @@ class SearchForm extends Component {
     this.handleTranslationChange = this.handleTranslationChange.bind(this);
     this.handleGradeChange = this.handleGradeChange.bind(this);
     this.onSubmit = this.onSubmit.bind(this);
+    this.nextPage = this.nextPage.bind(this);
+    this.previousPage = this.previousPage.bind(this);
   }
 
   handleWritingChange(event) {
@@ -38,6 +43,28 @@ class SearchForm extends Component {
   onSubmit(event) {
     event.preventDefault();
 
+    this.setState({page: 1}, function () {
+      this.getEntries();
+    }.bind(this));
+  }
+
+  nextPage(event) {
+    event.preventDefault();
+
+    this.setState({page: this.state.page + 1}, function () {
+      this.getEntries();
+    }.bind(this));
+  }
+
+  previousPage(event) {
+    event.preventDefault();
+
+    this.setState({page: this.state.page - 1}, function () {
+      this.getEntries();
+    }.bind(this));
+  }
+
+  getEntries() {
     var query_items = [];
 
     Object.keys(this.state).forEach(function(key) {
@@ -102,7 +129,7 @@ class SearchForm extends Component {
                   value={this.state.grade}
                   onChange={this.handleGradeChange}
                 >
-                  <option value="">None</option>
+                  <option value="" disabled>Select a Grade</option>
                   <option value="1">1</option>
                   <option value="2">2</option>
                   <option value="3">3</option>
@@ -115,6 +142,9 @@ class SearchForm extends Component {
 
             <hr />
             <button type="submit" className="btn btn-danger">Search</button>
+
+            <button className="btn btn-danger" onClick={this.previousPage}>Previous</button>
+            <button className="btn btn-danger" onClick={this.nextPage}>Next</button>
           </form>
         </div>
       </div>
