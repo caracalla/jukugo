@@ -7,6 +7,8 @@ class SearchForm extends Component {
 
     var page = parseInt(this.props.query.page);
 
+    // FIXME: If the writing or reading is read from the query, it gets escaped
+    // into gibberish.  Example: 人 -> %E4%BA%BA
     this.state = {
       writing: this.props.query.writing || "",
       reading: this.props.query.reading || "",
@@ -129,7 +131,7 @@ class SearchForm extends Component {
                   value={this.state.grade}
                   onChange={this.handleGradeChange}
                 >
-                  <option value="" disabled>Select a Grade</option>
+                  <option value="">All Kanji</option>
                   <option value="1">1</option>
                   <option value="2">2</option>
                   <option value="3">3</option>
@@ -141,10 +143,28 @@ class SearchForm extends Component {
             </div>
 
             <hr />
-            <button type="submit" className="btn btn-danger">Search</button>
+            <div className="row">
+              <div className="col-4">
+                <button
+                  className="btn btn-danger btn-block"
+                  onClick={this.previousPage}
+                  disabled={this.state.page < 2 ? true : false}
+                >Prev</button>
+              </div>
 
-            <button className="btn btn-danger" onClick={this.previousPage}>Previous</button>
-            <button className="btn btn-danger" onClick={this.nextPage}>Next</button>
+              <div className="col-4 text-center">
+                <button type="submit" className="btn btn-success btn-block">Search</button>
+              </div>
+
+              <div className="col-4 text-right">
+                <button
+                  className="btn btn-danger btn-block"
+                  onClick={this.nextPage}
+                  // We can't disable this button, since the number of remaining
+                  // results is only accessible on the results page.
+                >Next</button>
+              </div>
+            </div>
           </form>
         </div>
       </div>

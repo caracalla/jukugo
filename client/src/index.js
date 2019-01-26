@@ -22,9 +22,9 @@ var jukugo = {
   },
 
   renderEntries: function (response) {
-    console.log(response.count);
+    console.log(response.total_count);
     ReactDOM.render(
-      <EntryList entries={response.entries} count={response.count} />,
+      <EntryList entries={response.entries} total_count={response.total_count} />,
       document.getElementById('entry-list-container')
     );
   },
