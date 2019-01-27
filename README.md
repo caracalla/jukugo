@@ -38,7 +38,6 @@ This guide assumes you're using a Debian machine with at least 1 GB of RAM.
 
 ## TODO
 * On the server:
-    * Handle pagination
     * Figure out a better way to sort the data such that the most commonly used and/or relevant terms are delivered first
         * Take flags such as "obsolete term" and "word containing out-dated kanji" into account?
 
@@ -50,5 +49,9 @@ This guide assumes you're using a Debian machine with at least 1 GB of RAM.
     * Reduce page clutter
         * Collapsible entries?
     * Server communication error indicator
+
+* Longer term:
+    * Futures and crap
+    * Rewrite the frontend (again)
 
 [monash-ftp]: http://ftp.monash.edu.au/pub/nihongo/JMdict_e.gz
