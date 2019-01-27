@@ -7,6 +7,10 @@ var db;
 
 app.use(cors());
 
+app.get('/', function (request, response) {
+  response.json({message: 'hi'});
+});
+
 app.get('/entries', function (request, response) {
   var pageSize = 20;
   var page = parseInt(request.query.page);
@@ -80,7 +84,7 @@ app.get('/entries', function (request, response) {
   });
 
   console.log(request.ip);
-})
+});
 
 MongoClient.connect(mongoURL, function (err, database) {
   if (err) { throw err; }
@@ -89,6 +93,6 @@ MongoClient.connect(mongoURL, function (err, database) {
   var port = 3000;
 
   app.listen(port, function () {
-    console.log('listening on ' + port)
-  })
-})
+    console.log('listening on ' + port);
+  });
+});

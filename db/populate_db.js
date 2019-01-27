@@ -149,16 +149,21 @@ var parseData = function (db, callback) {
   fs.readFile(JMdictFile, 'utf8', function (err, XMLData) {
     if (err) { throw err; }
 
+    console.log('about to parse the data');
+
     parser.parseString(XMLData, function (err, result) {
       if (err) { throw err; }
 
-      db.collection('entries').drop(function (err, result) {
-        // don't care if this fails
-      });
+      console.log('parsed the xml');
 
+      // db.collection('entries').drop(function (err, result) {
+      // });
+
+      console.log('parsing entries');
       // parse each entry
       parsedEntries = result.JMdict.entry.map(parseEntry);
 
+      console.log('about to write');
       db.collection('entries').insertMany(parsedEntries, callback);
     });
   });

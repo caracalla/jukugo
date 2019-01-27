@@ -20,13 +20,14 @@ This guide assumes you're using a Debian machine with at least 1 GB of RAM.
 
 ### Setting up the server
 1. In the root directory of the project, `yarn install`
-1. `cd jukugo/db`
+1. `cd db`
 1. Download JMdict_e.gz from the [Monash Nihongo ftp Archive][monash-ftp]
     ```sh
     curl -O http://ftp.monash.edu.au/pub/nihongo/JMdict_e.gz
     gunzip JMdict_e.gz
     ```
 1. `sed -f sanitize_jmdict.sed JMdict_e > JMdict_san`
+    * **OPTIONAL**: If your machine has less than 2 GB of RAM, it might not be able to handle the next step with one big JMdict_san file.  The `split_jmdict.pl` script will break up the file into 10 smaller but still valid XML files.  You'll then have to edit `populate_database.js` to use each file in sequence to properly complete the process.
 1. `node populate_database.js`
 1. `yarn start`
 
@@ -36,8 +37,6 @@ This guide assumes you're using a Debian machine with at least 1 GB of RAM.
 1. `yarn start`
 
 ## TODO
-* Spin up api server and live public client
-
 * On the server:
     * Handle pagination
     * Figure out a better way to sort the data such that the most commonly used and/or relevant terms are delivered first
