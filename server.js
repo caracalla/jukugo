@@ -5,6 +5,7 @@ var MongoClient = require('mongodb').MongoClient;
 var mongoURL = 'mongodb://localhost:27017/jukugo';
 var db;
 
+// Set up Express
 app.use(cors());
 
 app.get('/', function (request, response) {
@@ -63,12 +64,12 @@ app.get('/entries', function (request, response) {
   db.collection('entries', function (err, collection) {
     if (err) { throw err; }
 
-    collection.count(findQuery, function (err, count) {
-      if (err) { throw err; }
-      entry_count = count;
-    });
-
-    collection.find(findQuery).sort(sortQuery).skip(pageSize * (page - 1)).limit(pageSize).toArray(function (err, entries) {
+    collection.
+        find(findQuery).
+        sort(sortQuery).
+        skip(pageSize * (page - 1)).
+        limit(pageSize).
+        toArray(function (err, entries) {
       if (err) { throw err; }
 
       var response_obj = {entries: entries};
@@ -86,6 +87,8 @@ app.get('/entries', function (request, response) {
   console.log(request.ip);
 });
 
+
+// Set up Mongo and kick things off
 MongoClient.connect(mongoURL, function (err, database) {
   if (err) { throw err; }
   db = database;
