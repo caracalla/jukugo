@@ -58,7 +58,7 @@ app.get('/entries', function (request, response) {
     findQuery['senses.translations.glossaries'] = new RegExp(request.query.translation, "i");
   }
 
-  console.log('client query: ' + JSON.stringify(request.query));
+  console.log('Fetching entries for query: ' + JSON.stringify(request.query));
   console.log('mongo query: ' + JSON.stringify(findQuery));
 
   db.collection('entries', function (err, collection) {
@@ -83,8 +83,6 @@ app.get('/entries', function (request, response) {
       });
     });
   });
-
-  console.log(request.ip);
 });
 
 
@@ -96,6 +94,6 @@ MongoClient.connect(mongoURL, function (err, database) {
   var port = 3000;
 
   app.listen(port, function () {
-    console.log('listening on ' + port);
+    console.log(`listening on port ${port}\n`);
   });
 });
