@@ -5,6 +5,19 @@ var mongoURL = 'mongodb://localhost:27017/jukugo';
 var JMdictFile = "JMdict_san";
 
 var kanjiByGrade = JSON.parse(fs.readFileSync('kanji_by_grade.json', 'utf8'));
+var kanjiByGradeMap = (function () {
+  var map = {};
+
+  kanjiByGrade.grade1.forEach((kanji) => { map[kanji] = 1 });
+  kanjiByGrade.grade2.forEach((kanji) => { map[kanji] = 2 });
+  kanjiByGrade.grade3.forEach((kanji) => { map[kanji] = 3 });
+  kanjiByGrade.grade4.forEach((kanji) => { map[kanji] = 4 });
+  kanjiByGrade.grade5.forEach((kanji) => { map[kanji] = 5 });
+  kanjiByGrade.grade6.forEach((kanji) => { map[kanji] = 6 });
+
+  return map;
+})();
+
 var frequencyList = JSON.parse(fs.readFileSync('frequency_list.json', 'utf8'));
 var frequencyListKeys = Object.keys(frequencyList);
 
@@ -26,20 +39,15 @@ var determineGradeLevel = function (writing) {
     if (isKanji(character)) {
       kanjiCount += 1;
 
-      if ((!gradeLevel || gradeLevel == 1) && kanjiByGrade.grade1.includes(character)) {
-        gradeLevel = 1;
-      } else if ((!gradeLevel || gradeLevel <= 2) && kanjiByGrade.grade2.includes(character)) {
-        gradeLevel = 2;
-      } else if ((!gradeLevel || gradeLevel <= 3) && kanjiByGrade.grade3.includes(character)) {
-        gradeLevel = 3;
-      } else if ((!gradeLevel || gradeLevel <= 4) && kanjiByGrade.grade4.includes(character)) {
-        gradeLevel = 4;
-      } else if ((!gradeLevel || gradeLevel <= 5) && kanjiByGrade.grade5.includes(character)) {
-        gradeLevel = 5;
-      } else if ((!gradeLevel || gradeLevel <= 6) && kanjiByGrade.grade6.includes(character)) {
-        gradeLevel = 6;
+      var kanjiGrade = kanjiByGradeMap[character];
+
+      if (kanjiGrade) {
+        if (!gradeLevel || kanjiGrade > gradeLevel) {
+          gradeLevel = kanjiGrade;
+        }
       } else {
-        gradeLevel = 99; // stupid
+        // the kanji isn't within the six kyouiku grade levels
+        gradeLevel = 99;
       }
     } else {
       onlyKanji = false;
@@ -100,9 +108,9 @@ var parseSenses = function (senses) {
   var currentTranslation;
 
   senses.forEach(function (sense) {
-  	currentTranslation = {};
+    currentTranslation = {};
 
-  	if (Array.isArray(sense.pos)) {
+    if (Array.isArray(sense.pos)) {
       if (currentSense) { output.push(currentSense) }
 
       currentSense = { partsOfSpeech: sense.pos, translations: [] }
