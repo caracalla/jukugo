@@ -38,7 +38,7 @@ app.post('/users/:name/kanji', function (request, response) {
 
 app.post('/users/:name/resetKanji', function (request, response) {
   db.collection('users', function (err, users) {
-    if (err) { throw err;
+    if (err) { throw err; }
 
     users.updateOne(
       { name: request.params.name },
@@ -53,12 +53,11 @@ app.post('/users/:name/resetKanji', function (request, response) {
   });
 });
 
-
 app.get('/users/:name', function (request, response) {
   db.collection('users', function (err, users) {
     if (err) { throw err; }
 
-    console.log(`fetching user for name ${findQuery.name}\n`);
+    console.log(`fetching user for name ${request.params.name}\n`);
 
     users.findOne({ name: request.params.name }, function (err, user) {
       if (err) { throw err; }
