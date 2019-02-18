@@ -24,7 +24,13 @@ app.post('/users/:name/kanji', function (request, response) {
     users.findOne({ name: request.params.name }, function (err, user) {
       if (err) { throw err; }
 
-      user.kanji = user.kanji ? user.kanji.push(request.body.kanji) : [request.body.kanji];
+      if (user.kanji) {
+        user.kanji.push(request.body.kanji);
+      } else {
+        user.kanji = [request.body.kanji];
+      }
+
+      if (!user.words) { user.words = {}; }
 
       db.collection('entries', function (err, entries) {
         if (err) { throw err; }
@@ -41,38 +47,29 @@ app.post('/users/:name/kanji', function (request, response) {
           }
         };
 
-        entries.find(findQuery, function (err, matchingEntries) {
+        entries.find(findQuery).toArray(function (err, matchingEntries) {
           var entriesToLearn = matchingEntries.filter(function (entry) {
-            // only select entries that the user knows kanji for
-            for (var kanji in entry.primaryKanji) {
-              if (!user.kanji.includes(kanji)) { return false; }
-            }
+            // only select entries with more than one primary kanji that the
+            // user doesn't already know
+            if (entry.primaryKanji.length < 2 || user.words[entry._id]) { return false; }
 
-            // weed out duplicates
-            for (var word in user.words) {
-              if (word._id == entry._id) { return false; }
+            // only select entries that the user knows kanji for
+            for (var kanji of entry.primaryKanji) {
+              if (!user.kanji.includes(kanji)) { return false; }
             }
 
             return true;
           });
 
-          // format the words to put into the user object
-          var wordsToLearn = entriesToLearn.map(function (entry) {
-            return {
-              _id: entry._id,
-              status: 'new'
-            }
-          });
+          console.log(`found ${entriesToLearn.length} raw matching entries`);
 
-          if (user.words) {
-            user.words.concat(wordsToLearn);
-          } else {
-            user.words = wordsToLearn;
+          for (var entry of entriesToLearn) {
+            user.words[entry._id] = { status: 'new' };
           }
 
           users.updateOne(
             { name: user.name },
-            { words: user.words, kanji: user.kanji },
+            { $set: { words: user.words, kanji: user.kanji } },
             function (err, result) {
               if (err) { throw err; }
 
@@ -93,7 +90,7 @@ app.post('/users/:name/resetUser', function (request, response) {
 
     users.updateOne(
       { name: request.params.name },
-      { $set: { kanji: [], words: [] } },
+      { $set: { kanji: [], words: {} } },
       function (err, result) {
         if (err) { throw err; }
 
@@ -114,6 +111,98 @@ app.get('/users/:name', function (request, response) {
       if (err) { throw err; }
 
       response.json({ user: user });
+    });
+  });
+});
+
+app.get('/users/:name/words', function (request, response) {
+  db.collection('users', function (err, users) {
+    if (err) { throw err; }
+
+    users.findOne({ name: request.params.name }, function (err, user) {
+      if (err) { throw err; }
+
+      db.collection('entries', function (err, entries) {
+        if (err) { throw err; }
+
+        var wordsByStatus = {
+          new: [],
+          learned: [],
+          ignored: []
+        };
+
+        Object.keys(user.words).forEach(function (wordId) {
+          wordsByStatus[user.words[wordId].status].push(wordId);
+        });
+
+        // replace this with an aggregate query or something
+        entries.find({ _id: { $in: wordsByStatus['new'] } }).toArray(function (err, newEntries) {
+          if (err) { throw err; }
+
+          entries.find({_id: { $in: wordsByStatus['learned'] } }).toArray(function (err, learnedEntries) {
+            if (err) { throw err; }
+
+            entries.find({_id: { $in: wordsByStatus['ignored'] } }).toArray(function (err, ignoredEntries) {
+              if (err) { throw err; }
+
+              response.json({
+                newEntries: newEntries,
+                learnedEntries: learnedEntries,
+                ignoredEntries: ignoredEntries
+              });
+            });
+          });
+        });
+      });
+    });
+  });
+});
+
+app.post('/users/:name/words/learn/:wordId', function (request, response) {
+  db.collection('users', function (err, users) {
+    if (err) { throw err; }
+
+    users.findOne({ name: request.params.name }, function (err, user) {
+      if (err) { throw err; }
+
+      if (user.words[request.params.wordId]) {
+        user.words[request.params.wordId].status = 'learned';
+        user.words[request.params.wordId].nextReview = Date.now();
+
+        users.updateOne({ name: user.name }, { $set: { words: user.words } }, function (err, result) {
+          if (err) { throw err; }
+
+          console.log(`user ${user.name} learned word ${request.params.wordId}\n`);
+
+          response.json({ result: 'success' });
+        });
+      } else {
+        response.json({ result: 'noop' });
+      }
+    });
+  });
+});
+
+app.post('/users/:name/words/ignore/:wordId', function (request, response) {
+  db.collection('users', function (err, users) {
+    if (err) { throw err; }
+
+    users.findOne({ name: request.params.name }, function (err, user) {
+      if (err) { throw err; }
+
+      if (user.words[request.params.wordId]) {
+        user.words[request.params.wordId].status = 'ignored';
+
+        users.updateOne({ name: user.name }, { $set: { words: user.words } }, function (err, result) {
+          if (err) { throw err; }
+
+          console.log(`user ${user.name} ignored word ${request.params.wordId}\n`);
+
+          response.json({ result: 'success' });
+        });
+      } else {
+        response.json({ result: 'noop' });
+      }
     });
   });
 });

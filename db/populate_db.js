@@ -141,8 +141,12 @@ var parseEntry = function (entry) {
   if (Array.isArray(entry.k_ele)) {
     entryObject.writings = entry.k_ele.map(parseKanjiElement);
 
-    entryObject.primaryKanji = entryObject.writings[0].kanji.split('').filter(function (char) {
-      return isKanji(char)
+    entryObject.primaryKanji = entryObject.
+				writings[0].
+				kanji.
+				split('').
+				filter(function (character, index, self) {
+      return isKanji(character) && self.indexOf(character) === index;
     });
   }
 
