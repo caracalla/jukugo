@@ -1,5 +1,6 @@
 var express = require('express');
 var app = express();
+var bodyParser = require('body-parser');
 var cors = require('cors');
 var MongoClient = require('mongodb').MongoClient;
 var mongoURL = 'mongodb://localhost:27017/jukugo';
@@ -8,8 +9,58 @@ var db;
 // Set up Express
 app.use(cors());
 
+app.use(bodyParser.urlencoded({ extended: false }))
+app.use(bodyParser.json());
+
 app.get('/', function (request, response) {
+  console.log('just saying hi :)\n');
   response.json({message: 'hi'});
+});
+
+app.post('/users/:userName/kanji', function (request, response) {
+  db.collection('users', function (err, collection) {
+    collection.updateOne(
+      { name: request.params.userName },
+      { $push: { kanji: request.body.kanji } },
+      function (err, result) {
+        console.log(`updated kanji for user ${request.params.userName} with request.body.kanji\n`);
+        response.json({this: 'that'});
+
+        // now, we need to update the user's collection of words with this new kanji
+      }
+    );
+  });
+});
+
+app.post('/users/:userName/resetKanji', function (request, response) {
+  db.collection('users', function (err, collection) {
+    collection.updateOne(
+      { name: request.params.userName },
+      { $set: { kanji: [] } },
+      function (err, result) {
+        console.log(`reset kanji for user ${request.params.userName}\n`);
+
+        response.json({ result: 'success' });
+      }
+    );
+  });
+});
+
+
+app.get('/users/:userName', function (request, response) {
+  db.collection('users', function (err, collection) {
+    if (err) { throw err; }
+
+    let findQuery = {
+      name: request.params.userName
+    };
+
+    console.log(`fetching user for name ${findQuery.name}\n`);
+
+    collection.findOne(findQuery, function (err, user) {
+      response.json({ user: user });
+    });
+  });
 });
 
 app.get('/entries', function (request, response) {
