@@ -17,13 +17,17 @@ app.get('/', function (request, response) {
   response.json({message: 'hi'});
 });
 
-app.post('/users/:userName/kanji', function (request, response) {
-  db.collection('users', function (err, collection) {
-    collection.updateOne(
-      { name: request.params.userName },
+app.post('/users/:name/kanji', function (request, response) {
+  db.collection('users', function (err, users) {
+    if (err) { throw err; }
+
+    users.updateOne(
+      { name: request.params.name },
       { $push: { kanji: request.body.kanji } },
       function (err, result) {
-        console.log(`updated kanji for user ${request.params.userName} with request.body.kanji\n`);
+        if (err) { throw err; }
+
+        console.log(`updated kanji for user ${request.params.name} with request.body.kanji\n`);
         response.json({this: 'that'});
 
         // now, we need to update the user's collection of words with this new kanji
@@ -32,14 +36,17 @@ app.post('/users/:userName/kanji', function (request, response) {
   });
 });
 
-app.post('/users/:userName/resetKanji', function (request, response) {
-  db.collection('users', function (err, collection) {
-    collection.updateOne(
-      { name: request.params.userName },
+app.post('/users/:name/resetKanji', function (request, response) {
+  db.collection('users', function (err, users) {
+    if (err) { throw err;
+
+    users.updateOne(
+      { name: request.params.name },
       { $set: { kanji: [] } },
       function (err, result) {
-        console.log(`reset kanji for user ${request.params.userName}\n`);
+        if (err) { throw err; }
 
+        console.log(`reset kanji for user ${request.params.name}\n`);
         response.json({ result: 'success' });
       }
     );
@@ -47,17 +54,15 @@ app.post('/users/:userName/resetKanji', function (request, response) {
 });
 
 
-app.get('/users/:userName', function (request, response) {
-  db.collection('users', function (err, collection) {
+app.get('/users/:name', function (request, response) {
+  db.collection('users', function (err, users) {
     if (err) { throw err; }
-
-    let findQuery = {
-      name: request.params.userName
-    };
 
     console.log(`fetching user for name ${findQuery.name}\n`);
 
-    collection.findOne(findQuery, function (err, user) {
+    users.findOne({ name: request.params.name }, function (err, user) {
+      if (err) { throw err; }
+
       response.json({ user: user });
     });
   });
@@ -112,23 +117,23 @@ app.get('/entries', function (request, response) {
   console.log('Fetching entries for query: ' + JSON.stringify(request.query));
   console.log('mongo query: ' + JSON.stringify(findQuery));
 
-  db.collection('entries', function (err, collection) {
+  db.collection('entries', function (err, entries) {
     if (err) { throw err; }
 
-    collection.
+    entries.
         find(findQuery).
         sort(sortQuery).
         skip(pageSize * (page - 1)).
         limit(pageSize).
-        toArray(function (err, entries) {
+        toArray(function (err, matchingEntries) {
       if (err) { throw err; }
 
-      var response_obj = {entries: entries};
+      var response_obj = {entries: matchingEntries};
 
-      collection.count(findQuery, function (err, total) {
+      entries.count(findQuery, function (err, total) {
         if (err) { throw err; }
         response_obj.total_count = total;
-        console.log('results in page: ' + entries.length);
+        console.log('results in page: ' + matchingEntries.length);
         console.log('total results: ' + total + '\n');
         response.json(response_obj);
       });

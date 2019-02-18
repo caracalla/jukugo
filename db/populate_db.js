@@ -140,6 +140,10 @@ var parseEntry = function (entry) {
 
   if (Array.isArray(entry.k_ele)) {
     entryObject.writings = entry.k_ele.map(parseKanjiElement);
+
+    entryObject.primaryKanji = entryObject.writings[0].kanji.split('').filter(function (char) {
+      return isKanji(char)
+    });
   }
 
   if (Array.isArray(entry.r_ele)) {
