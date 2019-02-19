@@ -36,7 +36,18 @@ This guide assumes you're using a Debian machine with at least 1 GB of RAM.
 1. Change `basURL` of the server in `client/src/index.js` to the address of the server
 1. `yarn start`
 
+## Kyoushi
+
+This is my experimental jukugo learning tool.  I didn't bother with create-react-app this time, so the setup is much simpler.  Simply run the following command in the `kyoushi` directory and load `index.html` in your browser:
+
+```sh
+npx babel --watch src --out-dir . --presets react-app/prod
+```
+
+Further developments to come.
+
 ## TODO
+
 * On the server:
     * Figure out a better way to sort the data such that the most commonly used and/or relevant terms are delivered first
         * Take flags such as "obsolete term" and "word containing out-dated kanji" into account?
