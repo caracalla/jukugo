@@ -21,32 +21,83 @@ app.post('/users/:name/kanji', function (request, response) {
   db.collection('users', function (err, users) {
     if (err) { throw err; }
 
-    users.updateOne(
-      { name: request.params.name },
-      { $push: { kanji: request.body.kanji } },
-      function (err, result) {
+    users.findOne({ name: request.params.name }, function (err, user) {
+      if (err) { throw err; }
+
+      user.kanji = user.kanji ? user.kanji.push(request.body.kanji) : [request.body.kanji];
+
+      db.collection('entries', function (err, entries) {
         if (err) { throw err; }
 
-        console.log(`updated kanji for user ${request.params.name} with request.body.kanji\n`);
-        response.json({this: 'that'});
+        var findQuery = {
+          primaryKanji: {
+            $elemMatch: { $eq: request.body.kanji }
+          },
+          writings: {
+            $elemMatch: {
+              priority: { $gte: 1 },
+              kanjiCount: { $gte: 2 }
+            }
+          }
+        };
 
-        // now, we need to update the user's collection of words with this new kanji
-      }
-    );
+        entries.find(findQuery, function (err, matchingEntries) {
+          var entriesToLearn = matchingEntries.filter(function (entry) {
+            // only select entries that the user knows kanji for
+            for (var kanji in entry.primaryKanji) {
+              if (!user.kanji.includes(kanji)) { return false; }
+            }
+
+            // weed out duplicates
+            for (var word in user.words) {
+              if (word._id == entry._id) { return false; }
+            }
+
+            return true;
+          });
+
+          // format the words to put into the user object
+          var wordsToLearn = entriesToLearn.map(function (entry) {
+            return {
+              _id: entry._id,
+              status: 'new'
+            }
+          });
+
+          if (user.words) {
+            user.words.concat(wordsToLearn);
+          } else {
+            user.words = wordsToLearn;
+          }
+
+          users.updateOne(
+            { name: user.name },
+            { words: user.words, kanji: user.kanji },
+            function (err, result) {
+              if (err) { throw err; }
+
+              console.log(`updated kanji for user ${request.params.name} with request.body.kanji\n`);
+
+              response.json({ result: 'success' });
+            }
+          );
+        });
+      });
+    });
   });
 });
 
-app.post('/users/:name/resetKanji', function (request, response) {
+app.post('/users/:name/resetUser', function (request, response) {
   db.collection('users', function (err, users) {
     if (err) { throw err; }
 
     users.updateOne(
       { name: request.params.name },
-      { $set: { kanji: [] } },
+      { $set: { kanji: [], words: [] } },
       function (err, result) {
         if (err) { throw err; }
 
-        console.log(`reset kanji for user ${request.params.name}\n`);
+        console.log(`reset user ${request.params.name}\n`);
         response.json({ result: 'success' });
       }
     );
