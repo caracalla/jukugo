@@ -142,10 +142,10 @@ var parseEntry = function (entry) {
     entryObject.writings = entry.k_ele.map(parseKanjiElement);
 
     entryObject.primaryKanji = entryObject.
-				writings[0].
-				kanji.
-				split('').
-				filter(function (character, index, self) {
+        writings[0].
+        kanji.
+        split('').
+        filter(function (character, index, self) {
       return isKanji(character) && self.indexOf(character) === index;
     });
   }
@@ -161,8 +161,8 @@ var parseEntry = function (entry) {
   return entryObject;
 };
 
-var parseData = function (db, callback) {
-  fs.readFile(JMdictFile, 'utf8', function (err, XMLData) {
+var parseXMLFile = function (fileName, db, callback) {
+  fs.readFile(fileName, 'utf8', function (err, XMLData) {
     if (err) { throw err; }
 
     console.log('about to parse the xml');
@@ -171,9 +171,6 @@ var parseData = function (db, callback) {
       if (err) { throw err; }
 
       console.log('parsed the xml');
-
-      // db.collection('entries').drop(function (err, result) {
-      // });
 
       console.log('parsing entries');
       // parse each entry
@@ -185,12 +182,23 @@ var parseData = function (db, callback) {
   });
 };
 
+const args = process.argv.slice(2);
+
+if (args.length === 0 || args[0] === "--help") {
+  console.log("Usage: node popupate_db.js FILE");
+  console.log("FILE should be a portion of JMdict in XML format to be parsed");
+  console.log("and entered into the database");
+  process.exit();
+}
+
 MongoClient.connect(mongoURL, function (err, db) {
   if (err) { throw err; }
 
   console.log('connected!');
 
-  parseData(db, function(err, dbResult) {
+  var fileName = args[0];
+
+  parseXMLFile(fileName, db, function(err, dbResult) {
     if (err) { throw err; }
 
     console.log("done!");

@@ -18,8 +18,15 @@ my $file_counter = 1;
 my $entry_counter = 0;
 my $entries_per_file = 18200;
 
-# Need to append this to make it valid JMdict XML
-print OUTFILE "<JMdict>\n";
+# The beginning of the file is full of crap we don't need
+while (<FILE>) {
+	if ($_ eq "<entry>\n") {
+		# Need to append this to make it valid JMdict XML
+		print OUTFILE "<JMdict>\n";
+		print OUTFILE "<entry>\n";
+		last;
+	}
+}
 
 while (<FILE>) {
   print OUTFILE $_;
