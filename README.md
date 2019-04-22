@@ -27,8 +27,9 @@ This guide assumes you're using a Debian machine with at least 1 GB of RAM.
     gunzip JMdict_e.gz
     ```
 1. `sed -f sanitize_jmdict.sed JMdict_e > JMdict_san`
-    * **OPTIONAL**: If your machine has less than 2 GB of RAM, it might not be able to handle the next step with one big JMdict_san file.  The `split_jmdict.pl` script will break up the file into 10 smaller but still valid XML files.  You'll then have to edit `populate_database.js` to use each file in sequence to properly complete the process.
-1. `node populate_database.js`
+1. Populate the database:
+    * If your machine is pretty beefy, just run `node populate_db.js JMdict_san`
+    * If your machine is resource constrained, run `perl chunked_populate_db.pl`.  This will process one tenth of JMdict_san at a time.  If that's still too much, just change the relevant parameters in `chunked_populate_db.pl`
 1. `yarn start`
 
 ### Setting up the client
