@@ -30,7 +30,13 @@ app.post('/users/:name/kanji', function (request, response) {
         user.kanji = [request.body.kanji];
       }
 
-      if (!user.words) { user.words = {}; }
+      if (!user.words || !user.words.fresh) {
+        user.words = {
+          fresh: {},
+          learned: {},
+          ignored: {}
+        };
+      }
 
       db.collection('entries', function (err, entries) {
         if (err) { throw err; }
@@ -49,9 +55,14 @@ app.post('/users/:name/kanji', function (request, response) {
 
         entries.find(findQuery).toArray(function (err, matchingEntries) {
           var entriesToLearn = matchingEntries.filter(function (entry) {
-            // only select entries with more than one primary kanji that the
-            // user doesn't already know
-            if (entry.primaryKanji.length < 2 || user.words[entry._id]) { return false; }
+            // only select entries with more than one primary kanji, and that
+            // the user doesn't already know
+            if (entry.primaryKanji.length < 2
+                || user.words.fresh[entry._id]
+                || user.words.learned[entry._id]
+                || user.words.ignored[entry._id]) {
+              return false;
+            }
 
             // only select entries that the user knows kanji for
             for (var kanji of entry.primaryKanji) {
@@ -64,7 +75,7 @@ app.post('/users/:name/kanji', function (request, response) {
           console.log(`found ${entriesToLearn.length} raw matching entries`);
 
           for (var entry of entriesToLearn) {
-            user.words[entry._id] = { status: 'new' };
+            user.words.fresh[entry._id] = {};
           }
 
           users.updateOne(
@@ -90,7 +101,7 @@ app.post('/users/:name/resetUser', function (request, response) {
 
     users.updateOne(
       { name: request.params.name },
-      { $set: { kanji: [], words: {} } },
+      { $set: { kanji: [], words: { fresh: {}, learned: {}, ignored: {} } } },
       function (err, result) {
         if (err) { throw err; }
 
@@ -115,7 +126,14 @@ app.get('/users/:name', function (request, response) {
   });
 });
 
-app.get('/users/:name/words', function (request, response) {
+app.get('/users/:name/words/:status', function (request, response) {
+  var validStatuses = ["fresh", "learned", "ignored"];
+
+  if (!validStatuses.includes(request.params.status)) {
+    // does throwing kill the server?
+    throw "status is not valid!";
+  }
+
   db.collection('users', function (err, users) {
     if (err) { throw err; }
 
@@ -125,33 +143,10 @@ app.get('/users/:name/words', function (request, response) {
       db.collection('entries', function (err, entries) {
         if (err) { throw err; }
 
-        var wordsByStatus = {
-          new: [],
-          learned: [],
-          ignored: []
-        };
+        var wordIds = Object.keys(user.words[request.params.status]);
 
-        Object.keys(user.words).forEach(function (wordId) {
-          wordsByStatus[user.words[wordId].status].push(wordId);
-        });
-
-        // replace this with an aggregate query or something
-        entries.find({ _id: { $in: wordsByStatus['new'] } }).toArray(function (err, newEntries) {
-          if (err) { throw err; }
-
-          entries.find({_id: { $in: wordsByStatus['learned'] } }).toArray(function (err, learnedEntries) {
-            if (err) { throw err; }
-
-            entries.find({_id: { $in: wordsByStatus['ignored'] } }).toArray(function (err, ignoredEntries) {
-              if (err) { throw err; }
-
-              response.json({
-                newEntries: newEntries,
-                learnedEntries: learnedEntries,
-                ignoredEntries: ignoredEntries
-              });
-            });
-          });
+        entries.find({ _id: { $in: wordIds } }).toArray(function (err, entries) {
+          response.json({ entries: entries });
         });
       });
     });
@@ -165,9 +160,9 @@ app.post('/users/:name/words/learn/:wordId', function (request, response) {
     users.findOne({ name: request.params.name }, function (err, user) {
       if (err) { throw err; }
 
-      if (user.words[request.params.wordId]) {
-        user.words[request.params.wordId].status = 'learned';
-        user.words[request.params.wordId].nextReview = Date.now();
+      if (user.words.fresh[request.params.wordId]) {
+        user.words.learned[request.params.wordId] = { nextReview: Date.now() };
+        delete user.words.fresh[request.params.wordId];
 
         users.updateOne({ name: user.name }, { $set: { words: user.words } }, function (err, result) {
           if (err) { throw err; }
@@ -190,8 +185,9 @@ app.post('/users/:name/words/ignore/:wordId', function (request, response) {
     users.findOne({ name: request.params.name }, function (err, user) {
       if (err) { throw err; }
 
-      if (user.words[request.params.wordId]) {
-        user.words[request.params.wordId].status = 'ignored';
+      if (user.words.fresh[request.params.wordId]) {
+        user.words.ignored[request.params.wordId] = {};
+        delete user.words.fresh[request.params.wordId];
 
         users.updateOne({ name: user.name }, { $set: { words: user.words } }, function (err, result) {
           if (err) { throw err; }
