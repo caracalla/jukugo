@@ -6,6 +6,9 @@ var MongoClient = require('mongodb').MongoClient;
 var mongoURL = 'mongodb://localhost:27017/jukugo';
 var db;
 
+var fs = require('fs');
+var kanjiByGrade = JSON.parse(fs.readFileSync('db/kanji_by_grade.json', 'utf8'));
+
 // Set up Express
 app.use(cors());
 
@@ -24,10 +27,17 @@ app.post('/users/:name/kanji', function (request, response) {
     users.findOne({ name: request.params.name }, function (err, user) {
       if (err) { throw err; }
 
-      if (user.kanji) {
-        user.kanji.push(request.body.kanji);
+      console.log(`got user ${request.params.name}`);
+
+      // Remove the kanji from the user's to-learn list
+      user.kanjiToLearn = user.kanjiToLearn.filter(function(kanji) {
+        return kanji !== request.body.kanji;
+      });
+
+      if (!user.kanjiLearned) {
+        user.kanjiLearned = [request.body.kanji];
       } else {
-        user.kanji = [request.body.kanji];
+        user.kanjiLearned.push(request.body.kanji);
       }
 
       if (!user.words || !user.words.fresh) {
@@ -61,18 +71,19 @@ app.post('/users/:name/kanji', function (request, response) {
                 || user.words.fresh[entry._id]
                 || user.words.learned[entry._id]
                 || user.words.ignored[entry._id]) {
+              console.log('got here');
               return false;
             }
 
             // only select entries that the user knows kanji for
             for (var kanji of entry.primaryKanji) {
-              if (!user.kanji.includes(kanji)) { return false; }
+              if (!user.kanjiLearned.includes(kanji)) { return false; }
             }
 
             return true;
           });
 
-          console.log(`found ${entriesToLearn.length} raw matching entries`);
+          console.log(`found ${entriesToLearn.length} fresh words`);
 
           for (var entry of entriesToLearn) {
             user.words.fresh[entry._id] = {};
@@ -80,7 +91,13 @@ app.post('/users/:name/kanji', function (request, response) {
 
           users.updateOne(
             { name: user.name },
-            { $set: { words: user.words, kanji: user.kanji } },
+            {
+              $set:{
+                words: user.words,
+                kanjiToLearn: user.kanjiToLearn,
+                kanjiLearned: user.kanjiLearned
+              } 
+            },
             function (err, result) {
               if (err) { throw err; }
 
@@ -95,13 +112,20 @@ app.post('/users/:name/kanji', function (request, response) {
   });
 });
 
-app.post('/users/:name/resetUser', function (request, response) {
+app.post('/users/:name/reset', function (request, response) {
   db.collection('users', function (err, users) {
     if (err) { throw err; }
 
     users.updateOne(
       { name: request.params.name },
-      { $set: { kanji: [], words: { fresh: {}, learned: {}, ignored: {} } } },
+      { $set:
+        {
+          kanjiToLearn: kanjiByGrade.grade1,
+          kanjiLearned: [],
+          gradeLevel: 1, // TODO: make this matter
+          words: { fresh: {}, learned: {}, ignored: {} }
+        }
+      },
       function (err, result) {
         if (err) { throw err; }
 
@@ -121,7 +145,42 @@ app.get('/users/:name', function (request, response) {
     users.findOne({ name: request.params.name }, function (err, user) {
       if (err) { throw err; }
 
-      response.json({ user: user });
+      var reviewWordsCount = user.words.learned;
+
+      response.json({
+        user: {
+          name: user.name,
+          kanjiToLearn: user.kanjiToLearn,
+          freshWordsCount: Object.keys(user.words.fresh).length,
+          reviewWordsCount: 5
+        }
+      });
+    });
+  });
+});
+
+// reconcile this with the other endpoint below it
+app.get('/users/:name/words/review', function (request, response) {
+  console.log('getting review words for ', request.params.name);
+  db.collection('users', function (err, users) {
+    if (err) { throw err; }
+
+    users.findOne({ name: request.params.name }, function (err, user) {
+      if (err) { throw err; }
+
+      db.collection('entries', function (err, entries) {
+        if (err) { throw err; }
+
+        var now = Date.now();
+
+        var dueWordIds = Object.keys(user.words.learned).filter(function (wordId) {
+          return user.words.learned[wordId].nextReview < now;
+        });
+
+        entries.find({ _id: { $in: dueWordIds } }).toArray(function (err, entries) {
+          response.json({ entries: entries });
+        });
+      });
     });
   });
 });
@@ -203,6 +262,7 @@ app.post('/users/:name/words/ignore/:wordId', function (request, response) {
   });
 });
 
+// This drives legacy Jukugo, AKA Sagasu
 app.get('/entries', function (request, response) {
   var pageSize = 20;
   var page = parseInt(request.query.page);
