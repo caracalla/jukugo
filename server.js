@@ -27,8 +27,6 @@ app.post('/users/:name/kanji', function (request, response) {
     users.findOne({ name: request.params.name }, function (err, user) {
       if (err) { throw err; }
 
-      console.log(`got user ${request.params.name}`);
-
       // Remove the kanji from the user's to-learn list
       user.kanjiToLearn = user.kanjiToLearn.filter(function(kanji) {
         return kanji !== request.body.kanji;
@@ -40,12 +38,14 @@ app.post('/users/:name/kanji', function (request, response) {
         user.kanjiLearned.push(request.body.kanji);
       }
 
-      if (!user.words || !user.words.fresh) {
+      if (!user.words) {
         user.words = {
           fresh: {},
           learned: {},
           ignored: {}
         };
+      } else if (!user.words.fresh) {
+        user.words.fresh = {};
       }
 
       db.collection('entries', function (err, entries) {
@@ -71,21 +71,23 @@ app.post('/users/:name/kanji', function (request, response) {
                 || user.words.fresh[entry._id]
                 || user.words.learned[entry._id]
                 || user.words.ignored[entry._id]) {
-              console.log('got here');
               return false;
             }
 
             // only select entries that the user knows kanji for
             for (var kanji of entry.primaryKanji) {
-              if (!user.kanjiLearned.includes(kanji)) { return false; }
+              if (!user.kanjiLearned.includes(kanji)) {
+                return false;
+              }
             }
 
             return true;
           });
 
-          console.log(`found ${entriesToLearn.length} fresh words`);
+          console.log(`found ${entriesToLearn.length} fresh words for user ${request.params.name}`);
 
           for (var entry of entriesToLearn) {
+            // empty for now, we might add some metadata later
             user.words.fresh[entry._id] = {};
           }
 
@@ -96,7 +98,7 @@ app.post('/users/:name/kanji', function (request, response) {
                 words: user.words,
                 kanjiToLearn: user.kanjiToLearn,
                 kanjiLearned: user.kanjiLearned
-              } 
+              }
             },
             function (err, result) {
               if (err) { throw err; }
@@ -189,7 +191,7 @@ app.get('/users/:name/words/:status', function (request, response) {
   var validStatuses = ["fresh", "learned", "ignored"];
 
   if (!validStatuses.includes(request.params.status)) {
-    // does throwing kill the server?
+    // does throwing kill the server?  guess not?
     throw "status is not valid!";
   }
 
