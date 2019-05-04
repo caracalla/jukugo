@@ -9,6 +9,10 @@ var db;
 var fs = require('fs');
 var kanjiByGrade = JSON.parse(fs.readFileSync('db/kanji_by_grade.json', 'utf8'));
 
+// This is the basic unit of waiting between reviews
+var baseDelayMinutes = 90;
+var baseDelayMilliseconds = baseDelayMinutes * 60 * 1000;
+
 // Set up Express
 app.use(cors());
 
@@ -222,7 +226,11 @@ app.post('/users/:name/words/learn/:wordId', function (request, response) {
       if (err) { throw err; }
 
       if (user.words.fresh[request.params.wordId]) {
-        user.words.learned[request.params.wordId] = { nextReview: Date.now() };
+        user.words.learned[request.params.wordId] = {
+          nextReview: Date.now() + baseDelayMilliseconds,
+          level: 1
+        };
+
         delete user.words.fresh[request.params.wordId];
 
         users.updateOne({ name: user.name }, { $set: { words: user.words } }, function (err, result) {
@@ -254,6 +262,41 @@ app.post('/users/:name/words/ignore/:wordId', function (request, response) {
           if (err) { throw err; }
 
           console.log(`user ${user.name} ignored word ${request.params.wordId}\n`);
+
+          response.json({ result: 'success' });
+        });
+      } else {
+        response.json({ result: 'noop' });
+      }
+    });
+  });
+});
+
+app.post('/users/:name/words/review/:wordId/:status', function (request, response) {
+  db.collection('users', function (err, users) {
+    if (err) { throw err; }
+
+    users.findOne({ name: request.params.name }, function (err, user) {
+      if (err) { throw err; }
+
+      var reviewedWord = user.words.learned[request.params.wordId];
+
+      if (reviewedWord) {
+        if (request.params.status === "pass") {
+          reviewedWord.level = reviewedWord.level + 1;
+        } else {
+          // TODO: tune this
+          reviewedWord.level = Math.floor(reviewedWord.level / 3) + 1;
+        }
+
+        reviewedWord.nextReview = Date.now() + (baseDelayMilliseconds * reviewedWord.level);
+
+        user.words.learned[request.params.wordId] = reviewedWord;
+
+        users.updateOne({ name: user.name }, { $set: { words: user.words } }, function (err, result) {
+          if (err) { throw err; }
+
+          console.log(`user ${user.name} ${request.params.status}ed a review of word ${request.params.wordId}\n`);
 
           response.json({ result: 'success' });
         });
