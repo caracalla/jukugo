@@ -9,6 +9,8 @@ class Navbar extends React.Component {
     };
 
     this.notifyItemChange = props.notifyItemChange;
+    this.resetUser = props.resetUser;
+
     this.setActiveItem = this.setActiveItem.bind(this);
   }
 
@@ -45,6 +47,15 @@ class Navbar extends React.Component {
             {navItems}
           </ul>
         </div>
+
+        <ul className="navbar-nav ml-auto">
+          <button
+              className="btn btn-danger float-right"
+              type="submit"
+              onClick={this.resetUser}>
+            Reset
+          </button>
+        </ul>
       </nav>
     );
   }
@@ -74,29 +85,48 @@ class WordCard extends React.Component {
   constructor(props) {
     super(props);
 
-    this.wordId = props.word._id;
-    this.writings = props.word.writings;
-    this.readings = props.word.readings;
-    this.senses = props.word.senses;
+    this.word = props.word
     this.review = props.review;
 
     // functions
     this.learnWord = props.learnWord;
     this.ignoreWord = props.ignoreWord;
-    // function for doing well on learned word
-    // function for doing poorly on learned word
+    this.submitReview = props.submitReview;
   }
 
   bottomButtons() {
     if (this.review) {
-      <div className="row">
-      </div>
-    } else {
+      // Buttons for words under review
       return (
         <div className="row">
           <div className="col-6">
             <button
-                id={this.wordId}
+                id={this.word._id}
+                className="btn btn-danger btn-block"
+                onClick={this.submitReview}
+                data-status="pass">
+              Got It
+            </button>
+          </div>
+
+          <div className="col-6">
+            <button
+                id={this.word._id}
+                className="btn btn-danger btn-block"
+                onClick={this.submitReview}
+                data-status="fail">
+              Don't Got It
+            </button>
+          </div>
+        </div>
+      );
+    } else {
+      // Buttons for fresh words
+      return (
+        <div className="row">
+          <div className="col-6">
+            <button
+                id={this.word._id}
                 className="btn btn-danger btn-block"
                 onClick={this.learnWord}>
               Learn
@@ -105,7 +135,7 @@ class WordCard extends React.Component {
 
           <div className="col-6">
             <button
-                id={this.wordId}
+                id={this.word._id}
                 className="btn btn-outline-danger btn-block float-right"
                 onClick={this.ignoreWord}>
               Ignore
@@ -118,38 +148,39 @@ class WordCard extends React.Component {
 
   render() {
     let bottomButtons = this.bottomButtons();
+
     return (
-        <div className="col-lg-4 col-md-6 col-sm-12 mt-2" key={this.wordId}>
-          <div className="card">
-            <div className="card-body">
-              <h1 className="card-title text-center display-4">
-                {this.writings[0].kanji}
-              </h1>
+      <div className="col-lg-4 col-md-6 col-sm-12 mt-2 mb-3" key={this.word._id}>
+        <div className="card">
+          <div className="card-body">
+            <h1 className="card-title text-center display-4">
+              {this.word.writings[0].kanji}
+            </h1>
 
-              <h3 className="card-text">
-                <span className="badge badge-danger font-weight-normal">{this.readings[0].kana}</span>
-              </h3>
+            <h3 className="card-text">
+              <span className="badge badge-danger font-weight-normal">{this.word.readings[0].kana}</span>
+            </h3>
 
-              <p className="card-text">
-                {this.senses[0].translations[0].glossaries[0]}
-              </p>
+            <p className="card-text">
+              {this.word.senses[0].translations[0].glossaries[0]}
+            </p>
 
-              <WordModal wordId={this.wordId} writings={this.writings} />
+            <WordModal word={this.word} />
 
-              <p className="card-text">
-                <button
-                    className="btn btn-outline-danger btn-block btn-sm"
-                    data-toggle="modal"
-                    data-target={`#modal-${this.wordId}`}>
-                  See more
-                </button>
-              </p>
+            <p className="card-text">
+              <button
+                  className="btn btn-outline-danger btn-block btn-sm"
+                  data-toggle="modal"
+                  data-target={`#modal-${this.word._id}`}>
+                See more
+              </button>
+            </p>
 
-              {bottomButtons}
-            </div>
+            {bottomButtons}
           </div>
         </div>
-      );
+      </div>
+    );
   }
 }
 
@@ -160,38 +191,77 @@ class WordModal extends React.Component {
   constructor(props) {
     super(props);
 
-    this.state = {
-      key: props.wordId,
-      writings: props.writings
-    }
+    this.word = props.word
   }
 
   render() {
-    let modalId = `modal-${this.state.key}`
+    let modalId = `modal-${this.word._id}`
+    let kanjiCounter = 0;
 
-    let kanji = this.state.writings.map((writing) => {
+    let header = this.word.writings[0].kanji.split('').map((character) => {
+      kanjiCounter += 1;  // I hate this key shit
+
       return (
-        <p key={writing.kanji}>{writing.kanji}</p>
+        <a
+            target="_blank"
+            href={`https://en.wiktionary.org/wiki/${character}#Japanese`}
+            key={`${character}${kanjiCounter}`}>
+          {character}
+        </a>
       );
+    });
+
+    let writings = this.word.writings.map((writing) => {
+      return (
+        <span className="btn btn-lg btn-danger mx-1 mb-2" key={writing.kanji}>
+          {writing.kanji}
+        </span>
+      );
+    });
+
+    let readings = this.word.readings.map((reading) => {
+      return (
+        <span className="btn btn-lg btn-outline-danger mx-1 mb-2" key={reading.kana}>
+          {reading.kana}
+        </span>
+      );
+    });
+
+    let translations = this.word.senses.map((sense) => {
+      return sense.translations.map((translation) => {
+        return translation.glossaries.map((glossary) => {
+          return (
+            <p className="mx-1 lead" key={glossary}>
+              {glossary}
+            </p>
+          );
+        });
+      });
     });
 
     return (
       <div className="modal" tabIndex="-1" role="dialog" id={modalId} key={modalId}>
         <div className="modal-dialog" role="document">
           <div className="modal-content">
-            <div className="modal-header">
-              <h5 className="modal-title">{this.state.writings[0].kanji}</h5>
-              <button type="button" className="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-              </button>
-            </div>
             <div className="modal-body">
-              <h1>Kanji</h1>
+              <h1 className="display-3 text-center">{header}</h1>
+
+              <hr />
+
+              <h5>Writings</h5>
+              {writings}
+              <hr />
+
+              <h5>Readings</h5>
+              {readings}
+              <hr />
+
+              <h5>Translations</h5>
+              {translations}
 
             </div>
             <div className="modal-footer">
-              <button type="button" className="btn btn-secondary" data-dismiss="modal">Close</button>
-              <button type="button" className="btn btn-primary">Save changes</button>
+              <button type="button" className="btn btn-danger btn-block" data-dismiss="modal">Close</button>
             </div>
           </div>
         </div>
@@ -202,37 +272,147 @@ class WordModal extends React.Component {
 
 
 
-class ReviewState extends React.Component {
+class FreshWordsState extends React.Component {
   constructor(props) {
     super(props);
+
+    this.state = {
+      freshWords: props.freshWords
+    };
+
+    this.learnWordUrl = props.learnWordUrl;
+    this.ignoreWordUrl = props.ignoreWordUrl;
+    this.setParentState = props.setParentState;
+
+    this.learnWord = this.learnWord.bind(this);
+    this.ignoreWord = this.ignoreWord.bind(this);
+  }
+
+  learnWord(event) {
+    event.preventDefault();
+
+    let learnedWordId = event.target.id;
+    let learnWordUrl = `${this.learnWordUrl}/${learnedWordId}`
+
+    jQuery.post(learnWordUrl, (response) => {
+      let newFreshWords = this.state.freshWords.filter((freshWord) => {
+        return freshWord._id !== learnedWordId;
+      });
+
+      this.updateFreshWords(newFreshWords);
+    });
+  }
+
+  ignoreWord(event) {
+    event.preventDefault();
+
+    let ignoredWordId = event.target.id;
+    let ignoreWordUrl = `${this.ignoreWordUrl}/${ignoredWordId}`
+
+    jQuery.post(ignoreWordUrl, (response) => {
+      let newFreshWords = this.state.freshWords.filter((freshWord) => {
+        return freshWord._id !== ignoredWordId;
+      });
+
+      this.updateFreshWords(newFreshWords);
+    });
+  }
+
+  updateFreshWords(newFreshWords) {
+    if (newFreshWords.length > 0) {
+      this.setState({
+        freshWords: newFreshWords,
+      });
+    } else {
+      this.setParentState({
+        freshWords: [],
+        freshWordsCount: 0
+      });
+    }
   }
 
   render() {
-    return <p className="">Words Content</p>;
+    let freshWordCards = this.state.freshWords.map((freshWord) => {
+      return <WordCard
+          word={freshWord}
+          learnWord={this.learnWord}
+          ignoreWord={this.ignoreWord}
+          key={freshWord._id} />;
+    });
+
+    return (
+      <div>
+        <h1>Fresh Words</h1>
+
+        <div className="row mt-2">
+          {freshWordCards}
+        </div>
+      </div>
+    );
   }
 }
 
 
 
-class LearnState extends React.Component {
+class ReviewWordsState extends React.Component {
   constructor(props) {
     super(props);
+
+    this.state = {
+      reviewWords: props.reviewWords
+    };
+
+    this.submitReviewUrl = props.submitReviewUrl;
+    this.setParentState = props.setParentState;
+
+    this.submitReview = this.submitReview.bind(this);
+  }
+
+  submitReview(event) {
+    event.preventDefault();
+
+    let wordId = event.target.id;
+    let wordStatus = event.target.dataset["status"];
+
+    let submitReviewUrl = `${this.submitReviewUrl}/${wordId}/${wordStatus}`;
+
+    jQuery.post(submitReviewUrl, (response) => {
+      let newReviewWords = this.state.reviewWords.filter((reviewWord) => {
+        return reviewWord._id !== passedWordId;
+      });
+
+      if (newReviewWords.length > 0) {
+        this.setState({
+          reviewWords: newReviewWords,
+          reviewWordsCount: newReviewWords.length
+        });
+      } else {
+        this.setParentState({
+        reviewWords: [],
+        reviewWordsCount: 0
+      });
+      }
+    });
   }
 
   render() {
-    return <p className="">Words Content</p>;
-  }
-}
+    let reviewWordCards = this.state.reviewWords.map((reviewWord) => {
+      return <WordCard
+                word={reviewWord}
+                submitReview={this.submitReview}
+                key={reviewWord._id}
+                review={true} />;
+    });
 
+    return (
+      <div>
+        <h1>Review Words</h1>
 
-
-class KanjiState extends React.Component {
-  constructor(props) {
-    super(props);
-  }
-
-  render() {
-    return <p className="">Words Content</p>;
+        <div className="row mt-2">
+          {reviewWordCards}
+        </div>
+      </div>
+    );
   }
 }
 
@@ -243,6 +423,7 @@ class Kyoushi extends React.Component {
     super(props);
 
     this.state = {
+      username: props.username,
       kanjiToLearn: props.kanjiToLearn,
       freshWordsCount: props.freshWordsCount,
       reviewWordsCount: props.reviewWordsCount,
@@ -250,19 +431,21 @@ class Kyoushi extends React.Component {
       reviewWords: []
     }
 
-    this.resetUser = props.resetUser;
-    this.learnKanjiUrl = props.learnKanjiUrl
-    this.freshWordsUrl = props.freshWordsUrl
-    this.reviewWordsUrl = props.reviewWordsUrl
-    this.learnWordUrl = props.learnWordUrl
-    this.ignoreWordUrl = props.ignoreWordUrl
+    this.learnKanjiUrl = `http://192.168.57.10:3000/users/${this.state.username}/kanji`;
+    this.freshWordsUrl = `http://192.168.57.10:3000/users/${this.state.username}/words/fresh`;
+    this.reviewWordsUrl = `http://192.168.57.10:3000/users/${this.state.username}/words/review`;
+
+    this.learnWordUrl = `http://192.168.57.10:3000/users/${this.state.username}/words/learn`;
+    this.ignoreWordUrl = `http://192.168.57.10:3000/users/${this.state.username}/words/ignore`;
+
+    this.submitReviewUrl = `http://192.168.57.10:3000/users/${this.state.username}/words/review`;
 
     this.selectKanji = this.selectKanji.bind(this);
-    this.learnWord = this.learnWord.bind(this);
-    this.ignoreWord = this.ignoreWord.bind(this);
+    this.setStateFromChild = this.setStateFromChild.bind(this);
   }
 
-  getRelevantData() {
+  componentDidMount() {
+    // only runs on initialization
     if (this.state.freshWordsCount > 0) {
       this.getFreshWords();
     } else if (this.state.reviewWordsCount > 0) {
@@ -270,8 +453,10 @@ class Kyoushi extends React.Component {
     }
   }
 
-  componentDidMount() {
-    this.getRelevantData();
+  setStateFromChild(newState) {
+    // could I just pass this.setState here?
+    // thinking about it that way, this seems gross
+    this.setState(newState);
   }
 
   selectKanji(event) {
@@ -312,85 +497,41 @@ class Kyoushi extends React.Component {
     });
   }
 
-  learnWord(event) {
-    event.preventDefault();
-
-    let learnedWordId = event.target.id;
-    let learnWordUrl = `${this.learnWordUrl}/${learnedWordId}`
-
-    jQuery.post(learnWordUrl, (response) => {
-      let newFreshWords = this.state.freshWords.filter((freshWord) => {
-        return freshWord._id !== learnedWordId;
-      });
-
-      this.setState({
-        freshWords: newFreshWords,
-        freshWordsCount: newFreshWords.length
-      });
-    });
-  }
-
-  ignoreWord(event) {
-    event.preventDefault();
-
-    let ignoredWordId = event.target.id;
-    let ignoreWordUrl = `${this.ignoreWordUrl}/${ignoredWordId}`
-
-    jQuery.post(ignoreWordUrl, (response) => {
-      let newFreshWords = this.state.freshWords.filter((freshWord) => {
-        return freshWord._id !== ignoredWordId;
-      });
-
-      this.setState({
-        freshWords: newFreshWords,
-        freshWordsCount: newFreshWords.length
-      });
-    });
-  }
-
-  getContent() {
-    if (this.state.freshWordsCount > 0) {
-      return this.state.freshWords.map((freshWord) => {
-        return <WordCard
-            word={freshWord}
-            learnWord={this.learnWord}
-            ignoreWord={this.ignoreWord}
-            key={freshWord._id} />;
-      });
-    } else if (this.state.reviewWordsCount > 0) {
-      return this.state.reviewWords.map((reviewWord) => {
-        return <WordCard word={reviewWord} key={reviewWord._id} review={true} />;
-      });
+  render() {
+    if (this.state.freshWords.length > 0) {
+      return (
+        <FreshWordsState
+            freshWords={this.state.freshWords}
+            learnWordUrl={this.learnWordUrl}
+            ignoreWordUrl={this.ignoreWordUrl}
+            setParentState={this.setStateFromChild} />
+      );
+    } else if (this.state.reviewWords.length > 0) {
+      return (
+        <ReviewWordsState
+            reviewWords={this.state.reviewWords}
+            submitReviewUrl={this.submitReviewUrl}
+            setParentState={this.setStateFromChild} />
+      );
     } else {
-      return this.state.kanjiToLearn.map((kanji) => {
+      let kanjiButtons = this.state.kanjiToLearn.map((kanji) => {
         return (
           <button className="btn btn-danger btn-lg m-2" onClick={this.selectKanji} key={kanji}>
             {kanji}
           </button>
         );
       });
-    }
-  }
 
-  render() {
-    console.log('getting content')
-    let content = this.getContent();
+      return (
+        <div>
+          <h1>Select New Kanji</h1>
 
-    return (
-      <div>
-        <div className="row mt-2">
-          <div className="col-12">
-            <button className="btn btn-danger" onClick={this.resetUser}>
-              Reset User
-            </button>
+          <div className="row mt-2">
+            {kanjiButtons}
           </div>
         </div>
-
-        <div className="row mt-2">
-          {content}
-        </div>
-      </div>
-    );
+      );
+    }
   }
 }
 
@@ -485,14 +626,9 @@ class Jukugo extends React.Component {
       case 'Kyoushi': {
         return <Kyoushi
                   kanjiToLearn={this.state.user.kanjiToLearn}
-                  resetUser={this.resetUser}
                   freshWordsCount={this.state.user.freshWordsCount}
                   reviewWordsCount={this.state.user.reviewWordsCount}
-                  learnKanjiUrl={`http://192.168.57.10:3000/users/${this.state.username}/kanji`}
-                  freshWordsUrl={`http://192.168.57.10:3000/users/${this.state.username}/words/fresh`}
-                  reviewWordsUrl={`http://192.168.57.10:3000/users/${this.state.username}/words/review`}
-                  learnWordUrl={`http://192.168.57.10:3000/users/${this.state.username}/words/learn`}
-                  ignoreWordUrl={`http://192.168.57.10:3000/users/${this.state.username}/words/ignore`} />;
+                  username={this.state.username} />
         break;
       }
       // case 'Profile': {
@@ -514,7 +650,8 @@ class Jukugo extends React.Component {
         <Navbar
             items={ this.navbarItems }
             activeItem={ this.state.activeItem }
-            notifyItemChange={ this.notifyItemChange } />
+            notifyItemChange={ this.notifyItemChange }
+            resetUser={this.resetUser} />
 
         <div className="mt-2 container">
           <div className="row">
