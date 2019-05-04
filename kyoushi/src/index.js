@@ -149,34 +149,55 @@ class WordCard extends React.Component {
   render() {
     let bottomButtons = this.bottomButtons();
 
+    let bodyId = `body-${this.word._id}`;
+
+    let revealButton = (
+      <button
+          className="btn btn-danger btn-block"
+          onClick={(event) => {
+            event.preventDefault();
+            let element = document.querySelector(`#${bodyId}`);
+            event.target.hidden = true;
+            element.hidden = false;
+          }}>
+        Reveal
+      </button>
+    );
+
     return (
       <div className="col-lg-4 col-md-6 col-sm-12 mt-2 mb-3" key={this.word._id}>
         <div className="card">
-          <div className="card-body">
+          <div className="card-header">
             <h1 className="card-title text-center display-4">
               {this.word.writings[0].kanji}
             </h1>
+          </div>
 
-            <h3 className="card-text">
-              <span className="badge badge-danger font-weight-normal">{this.word.readings[0].kana}</span>
-            </h3>
+          <div className="card-body">
+            {this.review ? revealButton : ''}
 
-            <p className="card-text">
-              {this.word.senses[0].translations[0].glossaries[0]}
-            </p>
+            <div id={bodyId} hidden={this.review ? 'hidden' : ''}>
+              <h3 className="card-text">
+                <span className="badge badge-danger font-weight-normal">{this.word.readings[0].kana}</span>
+              </h3>
 
-            <WordModal word={this.word} />
+              <p className="card-text">
+                {this.word.senses[0].translations[0].glossaries[0]}
+              </p>
 
-            <p className="card-text">
-              <button
-                  className="btn btn-outline-danger btn-block btn-sm"
-                  data-toggle="modal"
-                  data-target={`#modal-${this.word._id}`}>
-                See more
-              </button>
-            </p>
+              <WordModal word={this.word} />
 
-            {bottomButtons}
+              <p className="card-text">
+                <button
+                    className="btn btn-outline-danger btn-block btn-sm"
+                    data-toggle="modal"
+                    data-target={`#modal-${this.word._id}`}>
+                  See more
+                </button>
+              </p>
+
+              {bottomButtons}
+            </div>
           </div>
         </div>
       </div>
@@ -378,7 +399,7 @@ class ReviewWordsState extends React.Component {
 
     jQuery.post(submitReviewUrl, (response) => {
       let newReviewWords = this.state.reviewWords.filter((reviewWord) => {
-        return reviewWord._id !== passedWordId;
+        return reviewWord._id !== wordId;
       });
 
       if (newReviewWords.length > 0) {
@@ -489,7 +510,6 @@ class Kyoushi extends React.Component {
 
   getReviewWords() {
     jQuery.get(this.reviewWordsUrl, (response) => {
-      console.log('got review words?')
       this.setState({
         reviewWords: response.entries,
         reviewWordsCount: response.entries.length
