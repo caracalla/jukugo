@@ -3,3 +3,5 @@ JMdict_*
 node_modules
 
 *.swp
+
+kyoushi/index.js

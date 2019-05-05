@@ -1,3 +1,6 @@
+const baseUrl = 'http://api.jukugo.caracal.la';
+// const baseUrl = 'http://192.168.57.10:3000';
+
 class Navbar extends React.Component {
   constructor(props) {
     super(props);
@@ -452,14 +455,14 @@ class Kyoushi extends React.Component {
       reviewWords: []
     }
 
-    this.learnKanjiUrl = `http://192.168.57.10:3000/users/${this.state.username}/kanji`;
-    this.freshWordsUrl = `http://192.168.57.10:3000/users/${this.state.username}/words/fresh`;
-    this.reviewWordsUrl = `http://192.168.57.10:3000/users/${this.state.username}/words/review`;
+    this.learnKanjiUrl = `${baseUrl}/users/${this.state.username}/kanji`;
+    this.freshWordsUrl = `${baseUrl}/users/${this.state.username}/words/fresh`;
+    this.reviewWordsUrl = `${baseUrl}/users/${this.state.username}/words/review`;
 
-    this.learnWordUrl = `http://192.168.57.10:3000/users/${this.state.username}/words/learn`;
-    this.ignoreWordUrl = `http://192.168.57.10:3000/users/${this.state.username}/words/ignore`;
+    this.learnWordUrl = `${baseUrl}/users/${this.state.username}/words/learn`;
+    this.ignoreWordUrl = `${baseUrl}/users/${this.state.username}/words/ignore`;
 
-    this.submitReviewUrl = `http://192.168.57.10:3000/users/${this.state.username}/words/review`;
+    this.submitReviewUrl = `${baseUrl}/users/${this.state.username}/words/review`;
 
     this.selectKanji = this.selectKanji.bind(this);
     this.setStateFromChild = this.setStateFromChild.bind(this);
@@ -601,7 +604,7 @@ class Jukugo extends React.Component {
   }
 
   getUser(name) {
-    const userUrl = `http://192.168.57.10:3000/users/${this.state.username}`;
+    const userUrl = `${baseUrl}/users/${this.state.username}`;
 
     jQuery.get(userUrl, (response) => {
       let nextState = {
@@ -621,7 +624,7 @@ class Jukugo extends React.Component {
     event.preventDefault();
 
     this.setState({reload: true}, () => {
-      let url = `http://192.168.57.10:3000/users/${this.state.username}/reset`;
+      let url = `${baseUrl}/users/${this.state.username}/reset`;
 
       jQuery.post(url, (response) => {
         this.getUser(this.state.username);
