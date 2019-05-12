@@ -34,7 +34,7 @@ This guide assumes you're using a Debian machine with at least 1 GB of RAM.
 
 ### Setting up the client
 1. Run `yarn install` in the `client` directory
-1. Change `basURL` of the server in `client/src/index.js` to the address of the server
+1. Change `baseURL` of the server in `client/src/index.js` to the address of the server
 1. `yarn start`
 
 ## Kyoushi

@@ -20,12 +20,12 @@ print "Beginning to parse $input_filename\n";
 
 # The beginning of the input file is full of crap we don't need
 while (<FILE>) {
-	if ($_ eq "<entry>\n") {
-		# Need to append this to make it valid JMdict XML
-		print OUTFILE "<JMdict>\n";
-		print OUTFILE "<entry>\n";
-		last;
-	}
+  if ($_ eq "<entry>\n") {
+    # Need to append this to make it valid JMdict XML
+    print OUTFILE "<JMdict>\n";
+    print OUTFILE "<entry>\n";
+    last;
+  }
 }
 
 while (<FILE>) {
@@ -37,9 +37,9 @@ while (<FILE>) {
     if ($entry_counter >= $entries_per_file) {
       print OUTFILE "</JMdict>\n";
       close OUTFILE;
-			
-			print "inserting $entry_counter entries into the db\n";
-			`node populate_db.js $output_filename`;
+
+      print "inserting $entry_counter entries into the db\n";
+      `node populate_db.js $output_filename`;
 
       open OUTFILE, "> $output_filename" or die $!;
       print OUTFILE "<JMdict>\n";
