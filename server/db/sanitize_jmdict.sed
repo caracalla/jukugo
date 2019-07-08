@@ -181,5 +181,5 @@ s/&gt;/gt/g
 # Finally, remove any straggling semicolons used for grammatical reasons
 s/;/,/g
 
-# also the ampersands
+# Remove the ampersands
 s/&//g

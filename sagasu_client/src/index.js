@@ -6,7 +6,7 @@ import './index.css';
 import $ from 'jquery';
 
 var jukugo = {
-  baseURL: "http://api.jukugo.caracal.la/entries",
+  baseURL: "http://192.168.57.10:3000/entries",
 
   renderApp: function (queryString) {
     var queryItems = this.parseQueryString(queryString);
