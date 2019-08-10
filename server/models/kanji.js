@@ -1,5 +1,3 @@
-const Base = require('./base.js');
-
 // Kanji structure:
 // {
 //   _id: BSON id
@@ -9,11 +7,10 @@ const Base = require('./base.js');
 //   meaning: array of strings?
 // }
 
-exports.getIdsForGrade = async (db, gradeLevel) {
-  // is there a way to just get the ids?
-  let kanji = await db.collection('kanji').find({gradeLevel: gradeLevel}).toArray();
+const kanjiByGrade = require('../data/kanji_by_grade.json');
 
-  return kanji.map((kanji) => {
-    return kanji._id;
-  });
+exports.getForGrade = (grade) => {
+  let gradeString = `grade${grade}`;
+
+  return kanjiByGrade[gradeString];
 };

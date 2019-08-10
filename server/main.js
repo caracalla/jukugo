@@ -10,9 +10,6 @@ var db;
 
 const User = require('./models/user.js');
 
-// var fs = require('fs');
-// var kanjiByGrade = JSON.parse(fs.readFileSync('db/kanji_by_grade.json', 'utf8'));
-
 // Set up Express
 app.use(cors());
 app.use(bodyParser.urlencoded({ extended: false }))
@@ -27,7 +24,7 @@ app.get('/users/:name', async (request, response) => {
   console.log(`fetching user with name ${request.params.name}`);
 
   try {
-    let user = await User.find(db, request.params.name);
+    let user = await User.findByName(db, request.params.name);
     response.json({ user: user });
   } catch (err) {
     console.log(err);
@@ -40,9 +37,10 @@ app.get('/users/:name', async (request, response) => {
   const client = new MongoClient(mongoURL, { useNewUrlParser: true });
 
   await client.connect();
+  // This is gross, is there another way?
   db = client.db();
 
   await app.listen(port, async () => {
     console.log(`Jukugo server is listening on port ${port}\n`);
   });
-})();
+})().catch((e) => { console.log(e) });

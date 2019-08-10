@@ -1,16 +1,27 @@
-const Base = require('./base.js');
-
-// Word structure:
+// Word structure (only for learned words so far):
 // {
 //   nextReview: Unix timestamp
 //   level: integer
 // }
 
-exports.getIdsForGrade = async (db, gradeLevel) {
-  // is there a way to just get the ids?
-  let kanji = await db.collection('kanji').find({gradeLevel: gradeLevel}).toArray();
+const baseDelayMin = 90;
+const baseDelayMs = baseDelayMin * 60 * 1000;
 
-  return kanji.map((kanji) => {
-    return kanji._id;
-  });
-}
+exports.buildNewlyLearned = () => {
+  return {
+    nextReview: Date.now() + baseDelayMs,
+    level: 1
+  };
+};
+
+exports.review = (word, success) => {
+  if (success) {
+    word.level += 1;
+  } else {
+    word.level -= 1;
+  }
+
+  word.nextReview = Date.now() + (baseDelayMs * word.level);
+
+  return word;
+};
