@@ -22,6 +22,7 @@
 
 const Kanji = require('./kanji.js');
 const Word = require('./word.js');
+const Entry = require('./entry.js');
 
 class User {
   constructor(attributes) {
@@ -72,6 +73,12 @@ class User {
     return user;
   }
 
+  // TODO: remove
+  static async reset(db, name) {
+    await db.collection('users').deleteOne({ name: name });
+    return await this.create(db, { name: name });
+  }
+
   static async findByName(db, name) {
     let dbUser = await db.collection('users').findOne({ name: name });
 
@@ -103,21 +110,70 @@ class User {
       return;
     }
 
-    this.kanjiToLearn.filter((learnedKanji) => {
+    // update kanji to learn
+    this.kanjiToLearn = this.kanjiToLearn.filter((learnedKanji) => {
       return kanji !== learnedKanji;
     });
 
     if (this.kanjiToLearn.length === 0) {
-      // bump grade level
-      // populate kanjiToLearn with new grade kanji
+      this.gradeLevel += 1;
+      this.kanjiToLearn = Kanji.getForGrade(this.gradeLevel);
     }
 
+    // update learned kanji
     this.kanjiLearned.push(kanji);
 
-    // find new words based on learned kanji
-    // add words to fresh
+    // add fresh words based on newly learned kanji
+    let candidateEntries = await Entry.findForKanji(db, kanji);
 
-    this.save(db);
+    // why didn't this work?
+    // for (let entry of candidateEntries) {
+    //   // only select entries with more than one primary kanji, and that
+    //   // the user doesn't already know
+    //   if (entry.primaryKanji.length < 2
+    //       || this.words.learned[entry._id]
+    //       || this.words.fresh.includes(entry._id)
+    //       || this.words.ignored.includes(entry._id)) {
+    //     console.log('avoiding invalid entry');
+    //     continue;
+    //   }
+
+    //   // only select entries that the user knows kanji for
+    //   for (let kanji of entry.primaryKanji) {
+    //     if (!this.kanjiLearned.includes(kanji)) {
+    //       console.log('avoiding invalid entry 2');
+    //       continue;
+    //     }
+    //   }
+
+    //   this.words.fresh.push(entry._id);
+    // }
+
+    let entriesToLearn = candidateEntries.filter((entry) => {
+      // only select entries with more than one primary kanji, and that
+      // the user doesn't already know
+      if (entry.primaryKanji.length < 2
+          || this.words.learned[entry._id]
+          || this.words.fresh.includes(entry._id)
+          || this.words.ignored.includes(entry._id)) {
+        return false;
+      }
+
+      // only select entries that the user knows kanji for
+      for (let kanji of entry.primaryKanji) {
+        if (!this.kanjiLearned.includes(kanji)) {
+          return false;
+        }
+      }
+
+      return true;
+    });
+
+    for (let entry of entriesToLearn) {
+      this.words.fresh.push(entry._id);
+    }
+
+    await this.save(db);
   }
 
   async learnWord(db, entryId) {
@@ -158,6 +214,25 @@ class User {
     this.words.ignored.push(entryId);
 
     this.save(db);
+  }
+
+  formatForClient() {
+    let reviewWordsCount = 0;
+    let now = Date.now();
+
+    for (let [_id, word] of Object.entries(this.words.learned)) {
+      if (word.nextReview <= now) {
+        reviewWordsCount += 1;
+      }
+    }
+
+    return {
+      name: this.name,
+      sessionToken: this.sessionToken,
+      kanjiToLearn: this.kanjiToLearn,
+      freshWordsCount: this.words.fresh.length,
+      reviewWordsCount: reviewWordsCount
+    };
   }
 
   static wordNotFresh(entryId) {
