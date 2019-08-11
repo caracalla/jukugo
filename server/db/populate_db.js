@@ -1,10 +1,10 @@
 var fs = require('fs');
 var parser = new require("xml2js").Parser({ ignoreAttrs: true });
 var MongoClient = require('mongodb').MongoClient;
-var mongoURL = 'mongodb://localhost:27017/jukugo';
+var mongoURL = 'mongodb://localhost:27017';
 var JMdictFile = "JMdict_san";
 
-var kanjiByGrade = JSON.parse(fs.readFileSync('kanji_by_grade.json', 'utf8'));
+var kanjiByGrade = JSON.parse(fs.readFileSync('../data/kanji_by_grade.json', 'utf8'));
 var kanjiByGradeMap = (function () {
   var map = {};
 
@@ -18,7 +18,7 @@ var kanjiByGradeMap = (function () {
   return map;
 })();
 
-var frequencyList = JSON.parse(fs.readFileSync('frequency_list.json', 'utf8'));
+var frequencyList = JSON.parse(fs.readFileSync('../data/frequency_list.json', 'utf8'));
 var frequencyListKeys = Object.keys(frequencyList);
 
 var isKanji = function (character) {
@@ -191,18 +191,19 @@ if (args.length === 0 || args[0] === "--help") {
   process.exit();
 }
 
-MongoClient.connect(mongoURL, function (err, db) {
+MongoClient.connect(mongoURL, function (err, client) {
   if (err) { throw err; }
 
   console.log('connected!');
 
   var fileName = args[0];
+  var db = client.db('jukugo');
 
   parseXMLFile(fileName, db, function(err, dbResult) {
     if (err) { throw err; }
 
     console.log("done!");
     console.log(dbResult.result.n + " records inserted");
-    db.close();
+    client.close();
   });
 });

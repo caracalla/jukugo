@@ -107,7 +107,7 @@ app.post('/users/:name/kanji', function (request, response) {
             function (err, result) {
               if (err) { throw err; }
 
-              console.log(`updated kanji for user ${request.params.name} with request.body.kanji\n`);
+              console.log(`updated kanji for user ${request.params.name} with ${request.body.kanji}\n`);
 
               response.json({ result: 'success' });
             }
