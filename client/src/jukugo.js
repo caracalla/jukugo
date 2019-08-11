@@ -31,6 +31,8 @@ class Jukugo extends React.Component {
     this.resetUser = this.resetUser.bind(this);
     this.notifyContextChange = this.notifyContextChange.bind(this);
     this.notifyError = this.notifyError.bind(this);
+
+    this.logIn = this.logIn.bind(this);
   }
 
   componentDidMount() {
@@ -48,43 +50,23 @@ class Jukugo extends React.Component {
   getUser() {
     const userUrl = `${this.baseUrl}/users/${this.state.username}`;
 
-    Utils.get(
-      userUrl,
-      {
-        success: (response) => {
-          let nextState = {
-            username: response.user.name,
-            user: response.user,
-            loggedIn: true,
-            activeContext: this.state.nextContext
-          };
+    Utils.get(userUrl, {
+      success: (response) => {
+        let nextState = {
+          username: response.user.name,
+          user: response.user,
+          loggedIn: true,
+          activeContext: this.state.nextContext
+        };
 
-          console.log(`retrieved user ${response.user.name}`);
+        console.log(`retrieved user ${response.user.name}`);
 
-          this.setState(nextState);
-        },
-        failure: (errorMessage) => {
-          this.notifyError(errorMessage, 'getting the user');
-        }
+        this.setState(nextState);
+      },
+      failure: (errorMessage) => {
+        this.notifyError(errorMessage, 'getting the user');
       }
-    );
-
-    // jQuery.get(userUrl, (response) => {
-    //   if (response.error) {
-    //     this.notifyError(response.error, 'getting the user');
-    //   } else {
-    //     let nextState = {
-    //       username: response.user.name,
-    //       user: response.user,
-    //       loggedIn: true,
-    //       activeContext: this.state.nextContext
-    //     };
-
-    //     console.log(`retrieved user ${response.user.name}`);
-
-    //     this.setState(nextState);
-    //   }
-    // });
+    });
   }
 
   // TODO: remove this
@@ -99,18 +81,14 @@ class Jukugo extends React.Component {
     this.setState(nextState, () => {
       let url = `${this.baseUrl}/users/${this.state.username}/reset`;
 
-      Utils.post(
-        url,
-        {},
-        {
-          success: (response) => {
-            this.getUser(this.state.username);
-          },
-          failure: (errorMessage) => {
-            this.notifyError(errorMessage, 'resetting the user');
-          }
+      Utils.post(url, {}, {
+        success: (response) => {
+          this.getUser();
+        },
+        failure: (errorMessage) => {
+          this.notifyError(errorMessage, 'resetting the user');
         }
-      );
+      });
     });
   }
 
@@ -132,6 +110,57 @@ class Jukugo extends React.Component {
     });
   }
 
+  logInContext() {
+    return (
+      <form onSubmit={ this.logIn }>
+        <div className="form-group">
+          <label htmlFor="log-in-username">Username</label>
+          <input className="form-control" id="log-in-username" />
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="log-in-password">Password</label>
+          <input type="password" className="form-control" id="log-in-password" />
+        </div>
+
+        <button type="submit" className="btn btn-primary">Log In</button>
+      </form>
+    );
+  }
+
+  logIn(event) {
+    event.preventDefault();
+
+    let logInUrl = `${this.baseUrl}/log_in`;
+
+    let body = {
+      username: document.querySelector('#log-in-username').value,
+      password: document.querySelector('#log-in-password').value
+    }
+
+    Utils.post(logInUrl, body, {
+      success: (response) => {
+        // TODO: set cookies
+
+        let nextState = {
+          username: body.username,
+          nextContext: contexts.KYOUSHI
+        };
+
+        this.setState(nextState, () => {
+          this.getUser();
+        });
+      },
+      failure: (errorMessage) => {
+        console.log(errorMessage);
+      }
+    })
+  }
+
+  signUpContext() {
+    return <div>{ this.state.activeContext }</div>;
+  }
+
   getContent() {
     switch(this.state.activeContext) {
       case contexts.ERROR: {
@@ -142,18 +171,10 @@ class Jukugo extends React.Component {
         );
       }
       case contexts.LOG_IN: {
-        return (
-          <button
-              className="btn btn-lg btn-primary"
-              onClick={(event) => {
-                event.preventDefault();
-                this.setState({username: 'jimbo'}, () => {
-                  this.getUser();
-                });
-              }}>
-            Log In
-          </button>
-        );
+        return this.logInContext();
+      }
+      case contexts.SIGN_UP: {
+        return this.signUpContext();
       }
       case contexts.JUKUGO: {
         return (
@@ -176,13 +197,11 @@ class Jukugo extends React.Component {
               username={ this.state.username}
               kanjiToLearn={ this.state.user.kanjiToLearn }
               freshWordsCount={ this.state.user.freshWordsCount }
-              reviewWordsCount={ this.state.user.reviewWordsCount } />
+              reviewWordsCount={ this.state.user.reviewWordsCount }
+              notifyError={ this.notifyError } />
         );
       }
       case contexts.SAGASU: {
-        return <div>{ this.state.activeContext }</div>;
-      }
-      case contexts.SIGN_UP: {
         return <div>{ this.state.activeContext }</div>;
       }
       default: {

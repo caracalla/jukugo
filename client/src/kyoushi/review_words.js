@@ -11,7 +11,8 @@ class ReviewWords extends React.Component {
     };
 
     this.submitReviewUrl = props.submitReviewUrl;
-    this.setParentState = props.setParentState;
+    this.setReviewWordsEmpty = props.setReviewWordsEmpty;
+    this.notifyError = props.notifyError;
 
     this.submitReview = this.submitReview.bind(this);
   }
@@ -21,24 +22,25 @@ class ReviewWords extends React.Component {
 
     let wordId = event.target.id;
     let wordStatus = event.target.dataset["status"];
-
     let submitReviewUrl = `${this.submitReviewUrl}/${wordId}/${wordStatus}`;
 
-    jQuery.post(submitReviewUrl, (response) => {
-      let newReviewWords = this.state.reviewWords.filter((reviewWord) => {
-        return reviewWord._id !== wordId;
-      });
-
-      if (newReviewWords.length > 0) {
-        this.setState({
-          reviewWords: newReviewWords,
-          reviewWordsCount: newReviewWords.length
+    Utils.post(submitReviewUrl, {}, {
+      success: (response) => {
+        let newReviewWords = this.state.reviewWords.filter((reviewWord) => {
+          return reviewWord._id !== wordId;
         });
-      } else {
-        this.setParentState({
-        reviewWords: [],
-        reviewWordsCount: 0
-      });
+
+        if (newReviewWords.length > 0) {
+          this.setState({
+            reviewWords: newReviewWords,
+            reviewWordsCount: newReviewWords.length
+          });
+        } else {
+          this.setReviewWordsEmpty();
+        }
+      },
+      failure: (errorMessage) => {
+        this.notifyError(errorMessage, 'reviewing a word');
       }
     });
   }

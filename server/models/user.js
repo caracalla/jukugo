@@ -177,17 +177,37 @@ class User {
   }
 
   async learnWord(db, entryId) {
-    if (wordNotFresh(entryId)) {
+    if (this.wordNotFresh(entryId)) {
       return;
     }
 
-    this.words.fresh.filter((freshWordId) => {
+    this.words.fresh = this.words.fresh.filter((freshWordId) => {
       return entryId !== freshWordId;
     });
 
     this.words.learned[entryId] = Word.buildNewlyLearned();
 
     this.save(db);
+  }
+
+  async ignoreWord(db, entryId) {
+    if (this.wordNotFresh(entryId)) {
+      return;
+    }
+
+    this.words.fresh = this.words.fresh.filter((freshWordId) => {
+      return entryId !== freshWordId;
+    });
+
+    this.words.ignored.push(entryId);
+
+    this.save(db);
+  }
+
+  wordNotFresh(entryId) {
+    return !this.words.fresh.includes(entryId) ||
+        this.words.learned[entryId] ||
+        this.words.ignored.includes(entryId);
   }
 
   async reviewWord(db, entryId, success) {
@@ -202,43 +222,24 @@ class User {
     this.save(db);
   }
 
-  async ignoreWord(db, entryId) {
-    if (wordNotFresh(entryId)) {
-      return;
-    }
-
-    this.words.fresh.filter((freshWordId) => {
-      return entryId !== freshWordId;
-    });
-
-    this.words.ignored.push(entryId);
-
-    this.save(db);
-  }
-
   formatForClient() {
-    let reviewWordsCount = 0;
-    let now = Date.now();
-
-    for (let [_id, word] of Object.entries(this.words.learned)) {
-      if (word.nextReview <= now) {
-        reviewWordsCount += 1;
-      }
-    }
-
     return {
       name: this.name,
       sessionToken: this.sessionToken,
       kanjiToLearn: this.kanjiToLearn,
       freshWordsCount: this.words.fresh.length,
-      reviewWordsCount: reviewWordsCount
+      reviewWordsCount: this.getReviewWords().length
     };
   }
 
-  static wordNotFresh(entryId) {
-    return !this.words.fresh.includes(entryId) ||
-        this.words.learned[entryId] ||
-        this.words.ignoredincludes(entryId);
+  getReviewWords() {
+    let now = Date.now();
+
+    let reviewWords = Object.keys(this.words.learned).filter((wordId) => {
+      return this.words.learned[wordId].nextReview < now;
+    });
+
+    return reviewWords;
   }
 };
 

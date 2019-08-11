@@ -1,5 +1,7 @@
 import React from 'react';
 
+import * as Utils from '../utils.js';
+
 import WordCard from './word_card.js';
 
 class FreshWords extends React.Component {
@@ -12,7 +14,8 @@ class FreshWords extends React.Component {
 
     this.learnWordUrl = props.learnWordUrl;
     this.ignoreWordUrl = props.ignoreWordUrl;
-    this.setParentState = props.setParentState;
+    this.setFreshWordsEmpty = props.setFreshWordsEmpty;
+    this.notifyError = props.notifyError;
 
     this.learnWord = this.learnWord.bind(this);
     this.ignoreWord = this.ignoreWord.bind(this);
@@ -24,12 +27,17 @@ class FreshWords extends React.Component {
     let learnedWordId = event.target.id;
     let learnWordUrl = `${this.learnWordUrl}/${learnedWordId}`
 
-    jQuery.post(learnWordUrl, (response) => {
-      let newFreshWords = this.state.freshWords.filter((freshWord) => {
-        return freshWord._id !== learnedWordId;
-      });
+    Utils.post(learnWordUrl, {}, {
+      success: (response) => {
+        let newFreshWords = this.state.freshWords.filter((freshWord) => {
+          return freshWord._id !== learnedWordId;
+        });
 
-      this.updateFreshWords(newFreshWords);
+        this.updateFreshWords(newFreshWords);
+      },
+      failure: (errorMessage) => {
+        this.notifyError(errorMessage, 'learning a word');
+      }
     });
   }
 
@@ -39,12 +47,17 @@ class FreshWords extends React.Component {
     let ignoredWordId = event.target.id;
     let ignoreWordUrl = `${this.ignoreWordUrl}/${ignoredWordId}`
 
-    jQuery.post(ignoreWordUrl, (response) => {
-      let newFreshWords = this.state.freshWords.filter((freshWord) => {
-        return freshWord._id !== ignoredWordId;
-      });
+    Utils.post(ignoreWordUrl, {}, {
+      success: (response) => {
+        let newFreshWords = this.state.freshWords.filter((freshWord) => {
+          return freshWord._id !== ignoredWordId;
+        });
 
-      this.updateFreshWords(newFreshWords);
+        this.updateFreshWords(newFreshWords);
+      },
+      failure: (errorMessage) => {
+        this.notifyError(errorMessage, 'ignoring a word');
+      }
     });
   }
 
@@ -54,10 +67,7 @@ class FreshWords extends React.Component {
         freshWords: newFreshWords,
       });
     } else {
-      this.setParentState({
-        freshWords: [],
-        freshWordsCount: 0
-      });
+      this.setFreshWordsEmpty();
     }
   }
 
