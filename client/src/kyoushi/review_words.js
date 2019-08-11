@@ -1,0 +1,67 @@
+import React from 'react';
+
+import WordCard from './word_card.js';
+
+class ReviewWords extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      reviewWords: props.reviewWords
+    };
+
+    this.submitReviewUrl = props.submitReviewUrl;
+    this.setParentState = props.setParentState;
+
+    this.submitReview = this.submitReview.bind(this);
+  }
+
+  submitReview(event) {
+    event.preventDefault();
+
+    let wordId = event.target.id;
+    let wordStatus = event.target.dataset["status"];
+
+    let submitReviewUrl = `${this.submitReviewUrl}/${wordId}/${wordStatus}`;
+
+    jQuery.post(submitReviewUrl, (response) => {
+      let newReviewWords = this.state.reviewWords.filter((reviewWord) => {
+        return reviewWord._id !== wordId;
+      });
+
+      if (newReviewWords.length > 0) {
+        this.setState({
+          reviewWords: newReviewWords,
+          reviewWordsCount: newReviewWords.length
+        });
+      } else {
+        this.setParentState({
+        reviewWords: [],
+        reviewWordsCount: 0
+      });
+      }
+    });
+  }
+
+  render() {
+    let reviewWordCards = this.state.reviewWords.map((reviewWord) => {
+      return <WordCard
+                word={reviewWord}
+                submitReview={this.submitReview}
+                key={reviewWord._id}
+                review={true} />;
+    });
+
+    return (
+      <div>
+        <h1>Review Words</h1>
+
+        <div className="row mt-2">
+          {reviewWordCards}
+        </div>
+      </div>
+    );
+  }
+}
+
+export default ReviewWords;

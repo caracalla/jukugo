@@ -11,10 +11,11 @@ This guide assumes you're using a Debian machine with at least 1 GB of RAM.
     * **NOTE:** `yarn install` won't work with Node 10 for some reason, so I've been using Node 8 LTS.
 1. Install Yarn - https://yarnpkg.com/en/docs/install#debian-stable
     * This may be necessary https://askubuntu.com/questions/104160/
+1. Point the client at your Jukugo server by changing `baseUrl` in `src/index.js`
 
 ## Running the client
 
 ```sh
-npx babel-cli --watch src --out-dir . --presets react-app/prod
 open index.html
+yarn watch
 ```
