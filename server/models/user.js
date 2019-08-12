@@ -248,6 +248,6 @@ class User {
 
     return reviewWords;
   }
-};
+}
 
 module.exports = User;

@@ -25,6 +25,5 @@ yarn watch
     * set up local dev server so cookies actually work
 * user authentication
 * prevent flicker when loading Kyoushi with words to learn/review
-* port Sagasu logic
 * build real error handling
 * routing

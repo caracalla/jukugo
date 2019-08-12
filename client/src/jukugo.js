@@ -8,6 +8,7 @@ import Navbar from './navbar.js';
 import Splash from './splash.js';
 import ErrorContext from './error.js';
 import Kyoushi from './kyoushi/kyoushi.js';
+import Sagasu from './sagasu/sagasu.js';
 
 class Jukugo extends React.Component {
   constructor(props) {
@@ -255,7 +256,10 @@ class Jukugo extends React.Component {
         );
       }
       case contexts.SAGASU: {
-        return <div>{ this.state.activeContext }</div>;
+        return (
+          <Sagasu
+              baseUrl={ this.baseUrl } />
+        );
       }
       default: {
         return <p className="display-1">404</p>;

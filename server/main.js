@@ -24,6 +24,9 @@ app.get('/', async (request, response) => {
 });
 
 
+// *****************************************************************************
+// * Kyoushi Endpoints
+// *****************************************************************************
 // create a user
 app.post('/users', async (request, response) => {
   console.log(`creating user ${request.body.username}`);
@@ -205,6 +208,26 @@ app.post('/users/:name/words/review/:wordId/:status', async (request, response) 
 
   console.log('\n');
 });
+
+
+
+// *****************************************************************************
+// * Kyoushi Endpoints
+// *****************************************************************************
+app.get('/entries', async (request, response) => {
+  console.log(`Fetching entries for query: ${JSON.stringify(request.query)}`);
+
+  try {
+    let sagasuResponse = await Entry.findForSagasu(db, request.query);
+    response.json(sagasuResponse);
+  } catch (err) {
+    console.log(err);
+    response.json({ error: err });
+  }
+
+  console.log('\n');
+});
+
 
 
 // start the server
