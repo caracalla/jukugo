@@ -1,5 +1,7 @@
 import React from 'react';
 
+import * as Utils from '../utils.js';
+
 import WordCard from './word_card.js';
 
 class ReviewWords extends React.Component {

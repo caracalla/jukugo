@@ -19,3 +19,12 @@ This guide assumes you're using a Debian machine with at least 1 GB of RAM.
 open index.html
 yarn watch
 ```
+
+## TODO
+* get cookies working for login and sign up
+    * set up local dev server so cookies actually work
+* user authentication
+* prevent flicker when loading Kyoushi with words to learn/review
+* port Sagasu logic
+* build real error handling
+* routing

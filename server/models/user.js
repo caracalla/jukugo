@@ -44,6 +44,12 @@ class User {
     // * hash password
     // * create session token?
 
+    let nameRegex = /^[a-z0-9]+$/i;
+
+    if (!nameRegex.test(attributes.name)) {
+      throw `"${attributes.name}" is not a valid username!`;
+    }
+
     return new User({
       name: attributes.name,
       password: attributes.password,
@@ -51,6 +57,7 @@ class User {
       gradeLevel: 1,
       kanjiLearned: [],
       kanjiToLearn: Kanji.getForGrade(1),
+      // kanjiToLearn: [Kanji.getForGrade(1)[0]], // for testing advancing grades
       words: {
         fresh: [],
         learned: {},

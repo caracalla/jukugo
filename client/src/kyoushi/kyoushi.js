@@ -3,6 +3,7 @@ import React from 'react';
 import * as Utils from '../utils.js';
 
 import FreshWords from './fresh_words.js';
+import ReviewWords from './review_words.js';
 
 class Kyoushi extends React.Component {
   constructor(props) {
@@ -67,6 +68,13 @@ class Kyoushi extends React.Component {
         let kanjiToLearn = this.state.kanjiToLearn.filter((kanji) => {
           return kanji !== newKanji;
         });
+
+        if (kanjiToLearn.length === 0) {
+          // TODO: actual do something when someone learns an entire grade
+          // this is a horrible hack to make sure the page shows the next grade
+          // of kanji
+          location.reload();
+        }
 
         this.setState({kanjiToLearn: kanjiToLearn}, () => {
           this.getFreshWords();

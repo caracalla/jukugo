@@ -18,7 +18,9 @@ exports.review = (word, success) => {
   if (success) {
     word.level += 1;
   } else {
-    word.level -= 1;
+    if (word.level > 1) {
+      word.level -= 1;
+    }
   }
 
   word.nextReview = Date.now() + (baseDelayMs * word.level);

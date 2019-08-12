@@ -32,7 +32,8 @@ This guide assumes you're using a Debian machine with at least 1 GB of RAM.
 1. `yarn start`
 
 
-## Wishlist
-* real logging
-* saner model/db logic
+## TODO
+* user authentication
+    * session tokens? sent through headers?
+* implement real logging
 * indexes on the db

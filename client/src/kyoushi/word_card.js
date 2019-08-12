@@ -85,25 +85,35 @@ class WordCard extends React.Component {
       </button>
     );
 
+    let readingBadges = this.word.readings.map((reading) => {
+      return (
+        <span
+            className="badge badge-danger font-weight-normal mr-1"
+            key={ reading.kana }>
+          { reading.kana }
+        </span>
+      );
+    });
+
     return (
-      <div className="col-lg-4 col-md-6 col-sm-12 mt-2 mb-3" key={this.word._id}>
+      <div className="col-lg-4 col-md-6 col-sm-12 mt-2 mb-3" key={ this.word._id }>
         <div className="card">
           <div className="card-header">
             <h1 className="card-title text-center display-4">
-              {this.word.writings[0].kanji}
+              { this.word.writings[0].kanji }
             </h1>
           </div>
 
           <div className="card-body">
-            {this.review ? revealButton : ''}
+            { this.review ? revealButton : '' }
 
-            <div id={bodyId} hidden={this.review ? 'hidden' : ''}>
+            <div id={bodyId} hidden={ this.review ? 'hidden' : '' }>
               <h3 className="card-text">
-                <span className="badge badge-danger font-weight-normal">{this.word.readings[0].kana}</span>
+                { readingBadges }
               </h3>
 
               <p className="card-text">
-                {this.word.senses[0].translations[0].glossaries[0]}
+                { this.word.senses[0].translations[0].glossaries[0] }
               </p>
 
               <WordModal word={this.word} />
@@ -117,7 +127,7 @@ class WordCard extends React.Component {
                 </button>
               </p>
 
-              {bottomButtons}
+              { bottomButtons }
             </div>
           </div>
         </div>

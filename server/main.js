@@ -24,12 +24,34 @@ app.get('/', async (request, response) => {
 });
 
 
+// create a user
+app.post('/users', async (request, response) => {
+  console.log(`creating user ${request.body.username}`);
+
+  try {
+    let user = await User.create(db, {
+      name: request.body.username,
+      password: request.body.password
+    });
+
+    // TODO: change this to return session token and stuff
+    response.json({ result: 'success' });
+  } catch (err) {
+    console.log(err);
+    response.json({ error: err });
+  }
+
+  console.log('\n');
+});
+
+
 app.post('/log_in', async (request, response) => {
   console.log(`logging in ${request.body.username}`);
 
   try {
     let user = await User.findByName(db, request.body.username);
-    // TODO: change this
+
+    // TODO: change this to return session token and stuff
     response.json({ result: 'success' });
   } catch (err) {
     console.log(err);
@@ -151,7 +173,9 @@ app.get('/users/:name/words/review', async (request, response) => {
 
   try {
     let user = await User.findByName(db, request.params.name);
-    response.json({ entries: user.getReviewWords() });
+    let entries = await Entry.findByIds(db, user.getReviewWords());
+
+    response.json({ entries: entries });
   } catch (err) {
     console.log(err);
     response.json({ error: err });

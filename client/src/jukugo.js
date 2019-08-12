@@ -1,4 +1,5 @@
 import React from 'react';
+import * as Cookies from "js-cookie";
 
 import { contexts } from './contexts.js';
 import * as Utils from './utils.js';
@@ -16,7 +17,7 @@ class Jukugo extends React.Component {
 
     this.state = {
       loggedIn: false,
-      username: props.username,
+      username: Cookies.get('username'),
       activeContext: contexts.LOADING,
       nextContext: props.context || this.defaultContext,
       user: null,
@@ -33,6 +34,8 @@ class Jukugo extends React.Component {
     this.notifyError = this.notifyError.bind(this);
 
     this.logIn = this.logIn.bind(this);
+    this.logOut = this.logOut.bind(this);
+    this.signUp = this.signUp.bind(this);
   }
 
   componentDidMount() {
@@ -64,7 +67,14 @@ class Jukugo extends React.Component {
         this.setState(nextState);
       },
       failure: (errorMessage) => {
-        this.notifyError(errorMessage, 'getting the user');
+        console.log(`failed to get user ${this.state.username}`);
+
+        this.setState({
+          username: '',
+          user: null,
+          loggedIn: false,
+          activeContext: this.defaultContext
+        })
       }
     });
   }
@@ -110,24 +120,6 @@ class Jukugo extends React.Component {
     });
   }
 
-  logInContext() {
-    return (
-      <form onSubmit={ this.logIn }>
-        <div className="form-group">
-          <label htmlFor="log-in-username">Username</label>
-          <input className="form-control" id="log-in-username" />
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="log-in-password">Password</label>
-          <input type="password" className="form-control" id="log-in-password" />
-        </div>
-
-        <button type="submit" className="btn btn-primary">Log In</button>
-      </form>
-    );
-  }
-
   logIn(event) {
     event.preventDefault();
 
@@ -140,7 +132,7 @@ class Jukugo extends React.Component {
 
     Utils.post(logInUrl, body, {
       success: (response) => {
-        // TODO: set cookies
+        Cookies.set('username', body.username);
 
         let nextState = {
           username: body.username,
@@ -148,17 +140,77 @@ class Jukugo extends React.Component {
         };
 
         this.setState(nextState, () => {
+          console.log('username cookie is: ', Cookies.get('username'));
           this.getUser();
         });
       },
       failure: (errorMessage) => {
         console.log(errorMessage);
+        // TODO: show the error
       }
-    })
+    });
+  }
+
+  logOut(event) {
+    event.preventDefault();
+
+    Cookies.set('username', '');
+
+    this.setState({
+      loggedIn: false,
+      username: '',
+      activeContext: this.defaultContext,
+      user: null
+    });
   }
 
   signUpContext() {
-    return <div>{ this.state.activeContext }</div>;
+    return (
+      <form onSubmit={ this.signUp }>
+        <div className="form-group">
+          <label htmlFor="sign-up-username">Username</label>
+          <input className="form-control" id="sign-up-username" />
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="sign-up-password">Password</label>
+          <input type="password" className="form-control" id="sign-up-password" />
+        </div>
+
+        <button type="submit" className="btn btn-danger">Sign Up</button>
+      </form>
+    );
+  }
+
+  signUp(event) {
+    event.preventDefault();
+
+    let signUpUrl = `${this.baseUrl}/users`;
+
+    let body = {
+      username: document.querySelector('#sign-up-username').value,
+      password: document.querySelector('#sign-up-password').value
+    };
+
+    Utils.post(signUpUrl, body, {
+      success: (response) => {
+        Cookies.set('username', body.username);
+
+        let nextState = {
+          username: body.username,
+          nextContext: contexts.KYOUSHI
+        };
+
+        this.setState(nextState, () => {
+          console.log('username cookie is: ', Cookies.get('username'));
+          this.getUser();
+        });
+      },
+      failure: (errorMessage) => {
+        console.log(errorMessage);
+        // TODO: show the error
+      }
+    });
   }
 
   getContent() {
@@ -180,7 +232,8 @@ class Jukugo extends React.Component {
         return (
           <Splash
               username={ this.state.username }
-              notifyContextChange={ this.notifyContextChange } />
+              notifyContextChange={ this.notifyContextChange }
+              key={ this.state.loggedIn } />
         );
       }
       case contexts.LOADING: {
@@ -218,7 +271,10 @@ class Jukugo extends React.Component {
             loggedIn={ this.state.loggedIn }
             notifyContextChange={ this.notifyContextChange }
             resetUser={ this.resetUser }
-            key={ this.state.activeContext } />
+            logOut={ this.logOut }
+            logIn={ this.logIn }
+            // this makes me feel dirty, but it works
+            key={ this.state.activeContext + this.state.loggedIn } />
 
         <div className="mt-2 container">
           <div className="row">

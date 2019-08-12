@@ -16,8 +16,11 @@ class Navbar extends React.Component {
     this.activeContext = props.activeContext;
     this.loggedIn = props.loggedIn;
     this.username = props.username;
+
     this.notifyContextChange = props.notifyContextChange;
     this.resetUser = props.resetUser;
+    this.logOut = props.logOut;
+    this.logIn = props.logIn;
 
     this.setActiveContext = this.setActiveContext.bind(this);
   }
@@ -62,14 +65,52 @@ class Navbar extends React.Component {
         </div>
 
         <ul className="navbar-nav ml-auto">
-          <button
-              className="btn btn-danger float-right"
-              type="submit"
-              onClick={ this.resetUser }>
-            Reset
-          </button>
+          <li className="nav-item dropdown">
+            <button
+                className="btn btn-danger nav-link"
+                data-toggle="dropdown"
+                type="submit">
+              Account
+            </button>
+
+            <div className="dropdown-menu dropdown-menu-right">
+              <a
+                  className="dropdown-item"
+                  href="#"
+                  onClick={ this.resetUser }>
+                Reset
+              </a>
+
+              <div className="dropdown-divider"></div>
+
+              <a
+                  className="dropdown-item"
+                  href="#"
+                  onClick={ this.logOut }>Log Out</a>
+            </div>
+          </li>
         </ul>
       </nav>
+    );
+  }
+
+  logInForm() {
+    return (
+      <div className="dropdown-menu dropdown-menu-right">
+        <form className="px-3 py-2" onSubmit={ this.logIn }>
+          <div className="form-group">
+            <label htmlFor="log-in-username">Username</label>
+            <input className="form-control" id="log-in-username" />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="log-in-password">Password</label>
+            <input type="password" className="form-control" id="log-in-password" />
+          </div>
+
+          <button type="submit" className="btn btn-danger">Log In</button>
+        </form>
+      </div>
     );
   }
 
@@ -84,12 +125,16 @@ class Navbar extends React.Component {
         </a>
 
         <ul className="navbar-nav ml-auto">
-          <button
-              className="btn btn-danger float-right"
-              type="submit"
-              onClick={ this.setActiveContext }>
-            { contexts.LOG_IN }
-          </button>
+          <li className="nav-item dropdown">
+            <button
+                className="btn btn-danger nav-link"
+                data-toggle="dropdown"
+                type="submit">
+              Log In
+            </button>
+
+            { this.logInForm() }
+          </li>
         </ul>
       </nav>
     );
