@@ -117,7 +117,7 @@ class Kyoushi extends React.Component {
   kanjiPicker() {
     let kanjiButtons = this.state.kanjiToLearn.map((kanji) => {
       return (
-        <button className="btn btn-danger btn-lg m-2" onClick={this.selectKanji} key={kanji}>
+        <button className="btn btn-danger btn-lg mb-3 ml-3" onClick={this.selectKanji} key={kanji}>
           {kanji}
         </button>
       );
@@ -126,6 +126,8 @@ class Kyoushi extends React.Component {
     return (
       <div>
         <h1>Select New Kanji</h1>
+
+        <hr />
 
         <div className="row mt-2">
           {kanjiButtons}

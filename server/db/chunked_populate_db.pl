@@ -12,9 +12,9 @@ my $output_filename = "temp_JMdict_san";
 open FILE, $input_filename or die $!;
 open OUTFILE, "> $output_filename" or die $!;
 
-# there's 181913 entries total
+# there's about 185000 entries total
 my $entry_counter = 0;
-my $entries_per_file = 18200;
+my $entries_per_file = 20000;
 
 print "Beginning to parse $input_filename\n";
 
@@ -44,6 +44,10 @@ while (<FILE>) {
       open OUTFILE, "> $output_filename" or die $!;
       print OUTFILE "<JMdict>\n";
       $entry_counter = 0;
+
+      # Sleep to let my pitiful machine recover some memory before doing it all
+      # over again
+      sleep 3;
     }
   }
 }

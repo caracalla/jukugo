@@ -191,7 +191,7 @@ if (args.length === 0 || args[0] === "--help") {
   process.exit();
 }
 
-MongoClient.connect(mongoURL, function (err, client) {
+MongoClient.connect(mongoURL, {useNewUrlParser: true}, function (err, client) {
   if (err) { throw err; }
 
   console.log('connected!');
