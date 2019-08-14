@@ -5,6 +5,8 @@ class WordModal extends React.Component {
     super(props);
 
     this.word = props.word
+
+    this.extractTranslations = props.extractTranslations;
   }
 
   render() {
@@ -40,16 +42,12 @@ class WordModal extends React.Component {
       );
     });
 
-    let translations = this.word.senses.map((sense) => {
-      return sense.translations.map((translation) => {
-        return translation.glossaries.map((glossary) => {
-          return (
-            <p className="mx-1 lead" key={glossary}>
-              {glossary}
-            </p>
-          );
-        });
-      });
+    let translations = this.extractTranslations(this.word).map((translation) => {
+      return (
+        <p className="mx-1 lead" key={ translation }>
+          { translation }
+        </p>
+      );
     });
 
     return (

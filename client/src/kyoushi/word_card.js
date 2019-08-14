@@ -2,6 +2,8 @@ import React from 'react';
 
 import WordModal from './word_modal.js';
 
+const translationsToShow = 3;
+
 class WordCard extends React.Component {
   constructor(props) {
     super(props);
@@ -67,6 +69,21 @@ class WordCard extends React.Component {
     }
   }
 
+  // TODO: this is dumb, let's just handle this in populate_db
+  extractTranslations(word) {
+    let translations = [];
+
+    word.senses.forEach((sense) => {
+      sense.translations.forEach((translation) => {
+        translation.glossaries.forEach((glossary) => {
+          translations.push(glossary);
+        })
+      })
+    })
+
+    return translations;
+  }
+
   render() {
     let bottomButtons = this.bottomButtons();
 
@@ -95,6 +112,19 @@ class WordCard extends React.Component {
       );
     });
 
+    // grab the first 'translationsToShow' elements
+    let translations = this.extractTranslations(this.word).
+        slice(0, translationsToShow);
+
+    // why is this showing the top and bottom border?  bug in bootstrap?
+    let translationElements = translations.map((translation) => {
+      return (
+        <li className="list-group-item" key={ translation }>
+          { translation }
+        </li>
+      );
+    });
+
     return (
       <div className="col-lg-4 col-md-6 col-sm-12 mt-2 mb-3" key={ this.word._id }>
         <div className="card">
@@ -112,11 +142,13 @@ class WordCard extends React.Component {
                 { readingBadges }
               </h3>
 
-              <p className="card-text">
-                { this.word.senses[0].translations[0].glossaries[0] }
-              </p>
+              <ul className="list-group list-group-flush my-4">
+                { translationElements }
+              </ul>
 
-              <WordModal word={this.word} />
+              <WordModal
+                  word={ this.word }
+                  extractTranslations={ this.extractTranslations } />
 
               <p className="card-text">
                 <button
