@@ -176,7 +176,7 @@ app.get('/users/:name/words/review', async (request, response) => {
 
   try {
     let user = await User.findByName(db, request.params.name);
-    let entries = await Entry.findByIds(db, user.getReviewWords());
+    let entries = await Entry.findByIds(db, user.getReviewWords(), { maintainOrder: true });
 
     response.json({ entries: entries });
   } catch (err) {

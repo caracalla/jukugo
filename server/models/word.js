@@ -4,7 +4,7 @@
 //   level: integer
 // }
 
-const baseDelayMin = 90;
+const baseDelayMin = 720;
 const baseDelayMs = baseDelayMin * 60 * 1000;
 
 exports.buildNewlyLearned = () => {
