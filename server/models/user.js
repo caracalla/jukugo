@@ -246,6 +246,14 @@ class User {
       return this.words.learned[wordId].nextReview < now;
     });
 
+    // order the review words by next review, with the oldest review words first
+    reviewWords.sort((wordId1, wordId2) => {
+      let ts1 = this.words.learned[wordId1].nextReview;
+      let ts2 = this.words.learned[wordId2].nextReview;
+
+      return ts1 - ts2;
+    });
+
     return reviewWords;
   }
 }

@@ -21,10 +21,18 @@ exports.findForKanji = async (db, kanji) => {
   return await db.collection('entries').find(findQuery).toArray();
 };
 
-exports.findByIds = async (db, entryIds) => {
-  return await db.collection('entries').
+exports.findByIds = async (db, entryIds, options = {}) => {
+  let result = await db.collection('entries').
       find({ _id: { $in: entryIds } }).
       toArray();
+
+  if (options.maintainOrder) {
+    result.sort((entry1, entry2) => {
+      return entryIds.indexOf(entry1._id) - entryIds.indexOf(entry2._id);
+    });
+  }
+
+  return result;
 };
 
 exports.findForSagasu = async (db, query) => {
