@@ -131,6 +131,17 @@ class WordCard extends React.Component {
           <div className="card-header">
             <h1 className="card-title text-center display-4">
               { this.word.writings[0].kanji }
+
+              {/* Trying to figure out a way to move learned words to ignore
+              <div className="dropleft inline-block">
+                <button className="close" data-toggle="dropdown">&laquo;</button>
+
+                <div className="dropdown-menu">
+                  <a className="dropdown-item" href="#">something</a>
+                  <a className="dropdown-item" href="#">something2</a>
+                </div>
+              </div>
+              */}
             </h1>
           </div>
 

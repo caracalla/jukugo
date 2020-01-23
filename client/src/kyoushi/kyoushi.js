@@ -42,6 +42,8 @@ class Kyoushi extends React.Component {
     } else if (this.state.reviewWordsCount > 0) {
       this.getReviewWords();
     }
+
+    window.history.pushState(null, '', '/kyoushi');
   }
 
   setFreshWordsEmpty() {

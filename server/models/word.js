@@ -23,7 +23,9 @@ exports.review = (word, success) => {
     }
   }
 
-  word.nextReview = Date.now() + (baseDelayMs * word.level);
+  let newDelay = baseDelayMs * (Math.pow(2, (word.level - 1)));
+
+  word.nextReview = Date.now() + newDelay;
 
   return word;
 };

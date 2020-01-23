@@ -26,6 +26,8 @@ class Sagasu extends React.Component {
     if (Object.keys(this.state.query).length) {
       this.getEntries(this.state.query);
     }
+
+    window.history.pushState(null, '', '/sagasu');
   }
 
   getEntries(query) {

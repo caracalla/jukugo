@@ -4,22 +4,27 @@ class WordModal extends React.Component {
   constructor(props) {
     super(props);
 
-    this.word = props.word
+    this.word = props.word;
+    this.wordString = props.word.writings[0].kanji;
 
     this.extractTranslations = props.extractTranslations;
+  }
+
+  wiktionaryLink(item) {
+    return `https://en.wiktionary.org/wiki/${item}#Japanese`;
   }
 
   render() {
     let modalId = `modal-${this.word._id}`
     let kanjiCounter = 0;
 
-    let header = this.word.writings[0].kanji.split('').map((character) => {
+    let headerKanji = this.wordString.split('').map((character) => {
       kanjiCounter += 1;  // I hate this key shit
 
       return (
         <a
             target="_blank"
-            href={`https://en.wiktionary.org/wiki/${character}#Japanese`}
+            href={this.wiktionaryLink(character)}
             key={`${character}${kanjiCounter}`}>
           {character}
         </a>
@@ -55,7 +60,13 @@ class WordModal extends React.Component {
         <div className="modal-dialog" role="document">
           <div className="modal-content">
             <div className="modal-body">
-              <h1 className="display-3 text-center">{header}</h1>
+              <h1 className="display-3 text-center">{headerKanji}</h1>
+
+              <p className="text-center">
+                <a target="_blank" href={this.wiktionaryLink(this.wordString)}>
+                  Wiktionary page for {this.wordString}
+                </a>
+              </p>
 
               <hr />
 

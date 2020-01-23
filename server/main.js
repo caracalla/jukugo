@@ -190,14 +190,17 @@ app.get('/users/:name/words/review', async (request, response) => {
 
 // review a learned word
 app.post('/users/:name/words/review/:wordId/:status', async (request, response) => {
-  console.log(`user ${request.params.name} is reviewing word ${request.params.wordId}`);
+  let success = request.params.status == 'pass';
+  let status = success ? 'successfully' : 'unsuccessfully';
+
+  console.log(`user ${request.params.name} reviewed word ${request.params.wordId} ${status}`);
 
   try {
     let user = await User.findByName(db, request.params.name);
     await user.reviewWord(
       db,
       request.params.wordId,
-      request.params.status == "pass"
+      request.params.status == 'pass'
     );
 
     response.json({ result: 'success' });
