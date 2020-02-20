@@ -23,7 +23,20 @@ yarn watch
 ## TODO
 * get cookies working for login and sign up
     * set up local dev server so cookies actually work
+    * make cookies last longer
 * user authentication
+    * actually set a password, and check it when logging in
+    * automatically downcase username
+        * limit username characters to ascii?
 * prevent flicker when loading Kyoushi with words to learn/review
+* Kyoushi should always do the following:
+    1. if there are new words, display new words to learn
+    2. else if there are review words, display words to review
+    3. else show kanji picker
 * build real error handling
-* routing
+    * show login failure
+    * use bootstrap toasts?
+* more robust routing
+* use `fetch`, remove jQuery entirely
+* allow "forgetting" of learned words
+    * set them to ignored?

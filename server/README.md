@@ -36,4 +36,7 @@ This guide assumes you're using a Debian machine with at least 1 GB of RAM.
 * user authentication
     * session tokens? sent through headers?
 * implement real logging
-* indexes on the db
+    * winston? what's the standard?
+* add reasonable indexes on the db
+    * the schema is pretty hacky as it is; the user model will need to be altered to remain performant
+* start doing backups
