@@ -43,10 +43,11 @@ class Kyoushi extends React.Component {
       this.getReviewWords();
     }
 
-    window.history.pushState(null, '', '/kyoushi');
+    // window.history.pushState(null, '', '/kyoushi');
   }
 
   setFreshWordsEmpty() {
+    // at this point, we should really getUser again
     this.setState({
       freshWords: [],
       freshWordsCount: 0
