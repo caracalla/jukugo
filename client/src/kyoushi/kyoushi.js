@@ -43,7 +43,7 @@ class Kyoushi extends React.Component {
       this.getReviewWords();
     }
 
-    // window.history.pushState(null, '', '/kyoushi');
+    window.history.pushState(null, '', '/kyoushi');
   }
 
   setFreshWordsEmpty() {

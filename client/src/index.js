@@ -4,7 +4,7 @@ import ReactDOM from "react-dom";
 import Jukugo from "./jukugo.js";
 import { contexts } from './contexts.js';
 
-const baseUrl = 'http://api.jukugo.caracal.la';
+const baseUrl = 'https://api.jukugo.caracal.la';
 
 let route = (path) => {
   switch(path) {
