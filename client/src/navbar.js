@@ -87,6 +87,16 @@ class Navbar extends React.Component {
                   className="dropdown-item"
                   href="#"
                   onClick={ this.logOut }>Log Out</a>
+
+              <div className="dropdown-divider"></div>
+
+              <a
+                  className="dropdown-item"
+                  href="#"
+                  onClick={ (event) => {
+                    event.preventDefault();
+                    window.location.reload(true);
+                  } }>Reload the Page</a>
             </div>
           </li>
         </ul>

@@ -35,11 +35,11 @@ let getImpl = (url, headers, callbacks) => {
       callbacks.success(response);
     }
   })
-  .fail((_jqxhr, _status, error) => {
-    let errorMessage = `Request failed due to: ${error}`;
+  .fail((jqxhr, _status, error) => {
+    let errorMessage = `Request failed due to: ${error} (status ${jqxhr.status})`;
     callbacks.failure(errorMessage);
 
-    if (error === "Unauthorized") {
+    if (jqxhr.status === 401) {
       logOutUser();
       window.location.reload();
     }
@@ -75,10 +75,10 @@ let postImpl = (url, body, headers, callbacks) => {
     }
   })
   .fail((_jqxhr, _status, error) => {
-    let errorMessage = `Request failed due to: ${error}`;
+    let errorMessage = `Request failed due to: ${error} (status ${jqxhr.status})`;
     callbacks.failure(errorMessage);
 
-    if (error === "Unauthorized") {
+    if (jqxhr.status === 401) {
       logOutUser();
       window.location.reload();
     }
