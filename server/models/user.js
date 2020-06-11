@@ -240,7 +240,11 @@ class User {
     let now = Date.now();
 
     let reviewWords = Object.keys(this.words.learned).filter((wordId) => {
-      return this.words.learned[wordId].nextReview < now;
+      let word = this.words.learned[wordId];
+
+      // for now, let's just say if you've reached level 7, you know it well
+      // enough
+      return word.level < 7 && word.nextReview < now;
     });
 
     // order the review words by next review, with the oldest review words first

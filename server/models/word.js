@@ -4,12 +4,13 @@
 //   level: integer
 // }
 
-const baseDelayMin = 720;
-const baseDelayMs = baseDelayMin * 60 * 1000;
+// one hour in milliseconds
+const oneHour = 60 * 60 * 1000;
+const baseDelay = 12 * oneHour;
 
 exports.buildNewlyLearned = () => {
   return {
-    nextReview: Date.now() + baseDelayMs,
+    nextReview: Date.now() + baseDelay,
     level: 1
   };
 };
@@ -23,7 +24,9 @@ exports.review = (word, success) => {
     }
   }
 
-  let newDelay = baseDelayMs * (Math.pow(2, (word.level - 1)));
+  // introduce plus or minus one hour of jitter
+  let jitter = (2 * oneHour * Math.random()) - oneHour;
+  let newDelay = baseDelay * (Math.pow(2, (word.level - 1))) + jitter;
   word.nextReview = Date.now() + newDelay;
 
   return word;
