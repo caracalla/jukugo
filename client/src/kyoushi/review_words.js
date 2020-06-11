@@ -26,7 +26,7 @@ class ReviewWords extends React.Component {
     let wordStatus = event.target.dataset["status"];
     let submitReviewUrl = `${this.submitReviewUrl}/${wordId}/${wordStatus}`;
 
-    Utils.post(submitReviewUrl, {}, {
+    Utils.authedPost(submitReviewUrl, {}, {
       success: (response) => {
         let newReviewWords = this.state.reviewWords.filter((reviewWord) => {
           return reviewWord._id !== wordId;
@@ -42,7 +42,7 @@ class ReviewWords extends React.Component {
         }
       },
       failure: (errorMessage) => {
-        this.notifyError(errorMessage, 'reviewing a word');
+        this.notifyError('reviewing a word', errorMessage);
       }
     });
   }

@@ -3,7 +3,6 @@
 //   _id: BSON id
 //   name: string
 //   password: string (hashed)
-//   sessionToken: string
 //   gradeLevel: integer
 //   kanjiLearned: array of kanji (of all time learned)
 //   kanjiToLearn: array of kanji (only of grade level)
@@ -24,11 +23,11 @@ const Kanji = require('./kanji.js');
 const Word = require('./word.js');
 const Entry = require('./entry.js');
 
+
 class User {
   constructor(attributes) {
     this.name = attributes.name;
     this.password = attributes.password;
-    this.sessionToken = attributes.sessionToken;
     this.gradeLevel = attributes.gradeLevel;
     this.kanjiLearned = attributes.kanjiLearned;
     this.kanjiToLearn = attributes.kanjiToLearn;
@@ -36,14 +35,6 @@ class User {
   }
 
   static buildNew(attributes) {
-    // potential validations:
-    // * ensure name is alphanumeric
-    // * ensure password is reasonable
-
-    // things to do:
-    // * hash password
-    // * create session token?
-
     let nameRegex = /^[a-z0-9]+$/i;
 
     if (!nameRegex.test(attributes.name)) {
@@ -53,7 +44,6 @@ class User {
     return new User({
       name: attributes.name,
       password: attributes.password,
-      sessionToken: "", // TODO: how to handle session tokens? in the user class?
       gradeLevel: 1,
       kanjiLearned: [],
       kanjiToLearn: Kanji.getForGrade(1),
@@ -96,13 +86,21 @@ class User {
     return new User(dbUser);
   }
 
+  // make sure the password is sane (longer than 8 chars, etc)
+  static validatePassword(password) {
+    if (password.length < 8) {
+      return false;
+    }
+
+    return true;
+  }
+
   async save(db) {
     await db.collection('users').updateOne(
       { name: this.name },
       {
         $set: {
           // password: this.password,
-          sessionToken: this.sessionToken,
           gradeLevel: this.gradeLevel,
           kanjiLearned: this.kanjiLearned,
           kanjiToLearn: this.kanjiToLearn,
@@ -232,7 +230,6 @@ class User {
   formatForClient() {
     return {
       name: this.name,
-      sessionToken: this.sessionToken,
       kanjiToLearn: this.kanjiToLearn,
       freshWordsCount: this.words.fresh.length,
       reviewWordsCount: this.getReviewWords().length

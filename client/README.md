@@ -21,14 +21,9 @@ yarn watch
 ```
 
 ## TODO
-* get cookies working for login and sign up
-    * set up local dev server so cookies actually work
-    * make cookies last longer
-* user authentication
-    * actually set a password, and check it when logging in
-    * automatically downcase username
-        * limit username characters to ascii?
 * prevent flicker when loading Kyoushi with words to learn/review
+* if the user does two things wrong in a row, only one error can be shown
+    * fix with better error display (toasts?)
 * Kyoushi should always do the following:
     1. if there are new words, display new words to learn
     2. else if there are review words, display words to review

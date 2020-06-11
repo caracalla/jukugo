@@ -8,6 +8,9 @@ const MongoClient = require('mongodb').MongoClient;
 const mongoURL = 'mongodb://localhost:27017/jukugo';
 var db;
 
+const bcrypt = require('bcrypt');
+const SALT_ROUNDS = 10;
+
 const User = require('./models/user.js');
 const Entry = require('./models/entry.js');
 
@@ -17,11 +20,39 @@ app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json());
 
 
-
+// test endpoint
 app.get('/', async (request, response) => {
   console.log('just saying hi :)\n');
   response.json({ message: 'hi' });
 });
+
+
+// Session stuff
+let chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
+let generateSessionToken = function() {
+  let result = '';
+
+  for (let i = 8; i > 0; i--) {
+    result += chars[Math.floor(Math.random() * chars.length)];
+  }
+
+  return result;
+}
+
+let sessionStore = {};
+
+// authentication
+let authenticate = function(username, token, response) {
+  if (sessionStore[username] && sessionStore[username] === token) {
+    return true;
+  }
+
+  console.log(`unauthorized access by user ${username}!`);
+
+  response.status(401).send('Unauthorized Access');
+  return false;
+}
 
 
 // *****************************************************************************
@@ -29,36 +60,105 @@ app.get('/', async (request, response) => {
 // *****************************************************************************
 // create a user
 app.post('/users', async (request, response) => {
-  console.log(`creating user ${request.body.username}`);
+  let username = request.body.username;
+  let password = request.body.password;
 
-  try {
-    let user = await User.create(db, {
-      name: request.body.username,
-      password: request.body.password
-    });
+  console.log(`creating user ${username}`);
 
-    // TODO: change this to return session token and stuff
-    response.json({ result: 'success' });
-  } catch (err) {
-    console.log(err);
-    response.json({ error: err });
+  let hashPassword = (password) => {
+    return new Promise((result, reject) => {
+      if (!User.validatePassword(password)) {
+        reject('Password is not valid!');
+      }
+
+      bcrypt.hash(password, SALT_ROUNDS, async (err, hashedPassword) => {
+        if (err) {
+          reject(`bcrypt error: ${err}`);
+        }
+
+        result(hashedPassword);
+      });
+    })
   }
 
-  console.log('\n');
+  hashPassword(password).then(async (hashedPassword) => {
+    let user = await User.create(db, {
+      name: username,
+      password: hashedPassword
+    });
+
+    let sessionToken = generateSessionToken();
+    sessionStore[user.name] = sessionToken;
+
+    response.json({ sessionToken: sessionToken });
+  }).catch((err) => {
+    console.log(err);
+    response.json({ error: err });
+  }).finally(() => {
+    console.log('\n');
+  });
 });
 
 
 app.post('/log_in', async (request, response) => {
-  console.log(`logging in ${request.body.username}`);
+  let username = request.body.username;
+  let password = request.body.password;
 
-  try {
-    let user = await User.findByName(db, request.body.username);
+  console.log(`logging in ${username}`);
 
-    // TODO: change this to return session token and stuff
-    response.json({ result: 'success' });
-  } catch (err) {
+  let checkPassword = (password, hashedPassword) => {
+    return new Promise((result, reject) => {
+      // ideally we could do this check before we get the user
+      if (password.length === 0) {
+        reject('no password entered');
+      }
+
+      bcrypt.compare(password, hashedPassword, async (err, isValid) => {
+        if (err) {
+          reject(`bcrypt error: ${err}`);
+        }
+
+        result(isValid);
+      });
+    })
+  }
+
+  let user = await User.findByName(db, username);
+
+  checkPassword(password, user.password).then(async (isValid) => {
+    if (!isValid) {
+      throw 'invalid password supplied';
+    }
+
+    let sessionToken = generateSessionToken();
+    sessionStore[user.name] = sessionToken;
+
+    response.json({ sessionToken: sessionToken });
+  }).catch((err) => {
     console.log(err);
     response.json({ error: err });
+  }).finally(() => {
+    console.log('\n');
+  });
+});
+
+
+app.post('/log_out', async (request, response) => {
+  let username = request.body.username;
+  let token = request.header('X-Auth-Token');
+
+  console.log(`logging out ${username}`);
+
+  if (authenticate(username, token, response)) {
+    try {
+      // make a new token so no one can match it
+      sessionStore[username] = generateSessionToken();
+
+      response.json({ result: 'success' });
+    } catch (err) {
+      console.log(err);
+      response.json({ error: err });
+    }
   }
 
   console.log('\n');
@@ -67,14 +167,20 @@ app.post('/log_in', async (request, response) => {
 
 // get a user
 app.get('/users/:name', async (request, response) => {
-  console.log(`fetching user with name ${request.params.name}`);
+  let username = request.params.name;
+  let token = request.header('X-Auth-Token');
 
-  try {
-    let user = await User.findByName(db, request.params.name);
-    response.json({ user: user.formatForClient() });
-  } catch (err) {
-    console.log(err);
-    response.json({ error: err });
+  console.log(`fetching user with name ${username}`);
+
+  if (authenticate(username, token, response)) {
+    try {
+      let user = await User.findByName(db, username);
+
+      response.json({ user: user.formatForClient() });
+    } catch (err) {
+      console.log(err);
+      response.json({ error: err });
+    }
   }
 
   console.log('\n');
@@ -84,14 +190,21 @@ app.get('/users/:name', async (request, response) => {
 // reset a user
 // TODO: remove
 app.post('/users/:name/reset', async (request, response) => {
-  console.log(`resetting user ${request.params.name}`);
+  let username = request.params.name;
+  let token = request.header('X-Auth-Token');
 
-  try {
-    await User.reset(db, request.params.name);
-    response.json({ result: 'success' });
-  } catch (err) {
-    console.log(err);
-    response.json({ error: err });
+  console.log(`resetting user ${username}`);
+
+  if (authenticate(username, token, response)) {
+    try {
+      let user = await User.findByName(db, username);
+
+      await User.reset(db, username);
+      response.json({ result: 'success' });
+    } catch (err) {
+      console.log(err);
+      response.json({ error: err });
+    }
   }
 
   console.log('\n');
@@ -100,16 +213,22 @@ app.post('/users/:name/reset', async (request, response) => {
 
 // learn a kanji
 app.post('/users/:name/kanji', async (request, response) => {
-  console.log(`user ${request.params.name} learning kanji ${request.body.kanji}`);
+  let username = request.params.name;
+  let token = request.header('X-Auth-Token');
+  let learnedKanji = request.body.kanji;
 
-  try {
-    let user = await User.findByName(db, request.params.name);
-    await user.learnKanji(db, request.body.kanji);
+  console.log(`user ${username} learning kanji ${learnedKanji}`);
 
-    response.json({ result: 'success' });
-  } catch (err) {
-    console.log(err);
-    response.json({ error: err });
+  if (authenticate(username, token, response)) {
+    try {
+      let user = await User.findByName(db, username);
+      await user.learnKanji(db, learnedKanji);
+
+      response.json({ result: 'success' });
+    } catch (err) {
+      console.log(err);
+      response.json({ error: err });
+    }
   }
 
   console.log('\n');
@@ -118,16 +237,21 @@ app.post('/users/:name/kanji', async (request, response) => {
 
 // get a user's fresh words
 app.get('/users/:name/words/fresh', async (request, response) => {
-  console.log(`getting fresh words for user ${request.params.name}`);
+  let username = request.params.name;
+  let token = request.header('X-Auth-Token');
 
-  try {
-    let user = await User.findByName(db, request.params.name);
-    let entries = await Entry.findByIds(db, user.words.fresh);
+  console.log(`getting fresh words for user ${username}`);
 
-    response.json({ entries: entries });
-  } catch (err) {
-    console.log(err);
-    response.json({ error: err });
+  if (authenticate(username, token, response)) {
+    try {
+      let user = await User.findByName(db, username);
+      let entries = await Entry.findByIds(db, user.words.fresh);
+
+      response.json({ entries: entries });
+    } catch (err) {
+      console.log(err);
+      response.json({ error: err });
+    }
   }
 
   console.log('\n');
@@ -136,16 +260,22 @@ app.get('/users/:name/words/fresh', async (request, response) => {
 
 // learn a fresh word
 app.post('/users/:name/words/learn/:wordId', async (request, response) => {
-  console.log(`user ${request.params.name} is learning word ${request.params.wordId}`);
+  let username = request.params.name;
+  let token = request.header('X-Auth-Token');
+  let learnedWordId = request.params.wordId;
 
-  try {
-    let user = await User.findByName(db, request.params.name);
-    user.learnWord(db, request.params.wordId);
+  console.log(`user ${username} is learning word ${learnedWordId}`);
 
-    response.json({ result: 'success' });
-  } catch (err) {
-    console.log(err);
-    response.json({ error: err });
+  if (authenticate(username, token, response)) {
+    try {
+      let user = await User.findByName(db, username);
+      user.learnWord(db, learnedWordId);
+
+      response.json({ result: 'success' });
+    } catch (err) {
+      console.log(err);
+      response.json({ error: err });
+    }
   }
 
   console.log('\n');
@@ -154,16 +284,22 @@ app.post('/users/:name/words/learn/:wordId', async (request, response) => {
 
 // ignore a fresh word
 app.post('/users/:name/words/ignore/:wordId', async (request, response) => {
-  console.log(`user ${request.params.name} is ignoring word ${request.params.wordId}`);
+  let username = request.params.name;
+  let token = request.header('X-Auth-Token');
+  let ignoredWordId = request.params.wordId;
 
-  try {
-    let user = await User.findByName(db, request.params.name);
-    user.ignoreWord(db, request.params.wordId);
+  console.log(`user ${username} is ignoring word ${ignoredWordId}`);
 
-    response.json({ result: 'success' });
-  } catch (err) {
-    console.log(err);
-    response.json({ error: err });
+  if (authenticate(username, token, response)) {
+    try {
+      let user = await User.findByName(db, username);
+      user.ignoreWord(db, ignoredWordId);
+
+      response.json({ result: 'success' });
+    } catch (err) {
+      console.log(err);
+      response.json({ error: err });
+    }
   }
 
   console.log('\n');
@@ -172,16 +308,21 @@ app.post('/users/:name/words/ignore/:wordId', async (request, response) => {
 
 // get a user's review words
 app.get('/users/:name/words/review', async (request, response) => {
-  console.log(`getting words to review for ${request.params.name}`);
+  let username = request.params.name;
+  let token = request.header('X-Auth-Token');
 
-  try {
-    let user = await User.findByName(db, request.params.name);
-    let entries = await Entry.findByIds(db, user.getReviewWords(), { maintainOrder: true });
+  console.log(`getting words to review for ${username}`);
 
-    response.json({ entries: entries });
-  } catch (err) {
-    console.log(err);
-    response.json({ error: err });
+  if (authenticate(username, token, response)) {
+    try {
+      let user = await User.findByName(db, username);
+      let entries = await Entry.findByIds(db, user.getReviewWords(), { maintainOrder: true });
+
+      response.json({ entries: entries });
+    } catch (err) {
+      console.log(err);
+      response.json({ error: err });
+    }
   }
 
   console.log('\n');
@@ -190,17 +331,21 @@ app.get('/users/:name/words/review', async (request, response) => {
 
 // review a learned word
 app.post('/users/:name/words/review/:wordId/:status', async (request, response) => {
-  let success = request.params.status == 'pass';
-  let status = success ? 'successfully' : 'unsuccessfully';
+  let reviewSuccess = request.params.status === 'pass';
 
-  console.log(`user ${request.params.name} reviewed word ${request.params.wordId} ${status}`);
+  let username = request.params.name;
+  let token = request.header('X-Auth-Token');
+  let reviewedWordId = request.params.wordId;
+
+  let status = reviewSuccess ? 'successfully' : 'unsuccessfully';
+  console.log(`user ${username} reviewed word ${reviewedWordId} ${status}`);
 
   try {
-    let user = await User.findByName(db, request.params.name);
+    let user = await User.findByName(db, username);
     await user.reviewWord(
       db,
-      request.params.wordId,
-      request.params.status == 'pass'
+      reviewedWordId,
+      reviewSuccess
     );
 
     response.json({ result: 'success' });
@@ -215,7 +360,7 @@ app.post('/users/:name/words/review/:wordId/:status', async (request, response) 
 
 
 // *****************************************************************************
-// * Kyoushi Endpoints
+// * Sagasu Endpoints
 // *****************************************************************************
 app.get('/entries', async (request, response) => {
   console.log(`Fetching entries for query: ${JSON.stringify(request.query)}`);

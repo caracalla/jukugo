@@ -66,7 +66,7 @@ class Kyoushi extends React.Component {
 
     let newKanji = event.target.innerHTML;
 
-    Utils.post(this.learnKanjiUrl, { kanji: newKanji }, {
+    Utils.authedPost(this.learnKanjiUrl, { kanji: newKanji }, {
       success: (response) => {
         let kanjiToLearn = this.state.kanjiToLearn.filter((kanji) => {
           return kanji !== newKanji;
@@ -84,13 +84,13 @@ class Kyoushi extends React.Component {
         });
       },
       failure: (errorMessage) => {
-        this.notifyError(errorMessage, 'selecting a kanji');
+        this.notifyError('selecting a kanji', errorMessage);
       }
     });
   }
 
   getFreshWords() {
-    Utils.get(this.getFreshWordsUrl, {
+    Utils.authedGet(this.getFreshWordsUrl, {
       success: (response) => {
         this.setState({
           freshWords: response.entries,
@@ -98,13 +98,13 @@ class Kyoushi extends React.Component {
         });
       },
       failure: (errorMessage) => {
-        this.notifyError(errorMessage, 'getting fresh words');
+        this.notifyError('getting fresh words', errorMessage);
       }
     });
   }
 
   getReviewWords() {
-    Utils.get(this.getReviewWordsUrl, {
+    Utils.authedGet(this.getReviewWordsUrl, {
       success: (response) => {
         this.setState({
           reviewWords: response.entries,
@@ -112,7 +112,7 @@ class Kyoushi extends React.Component {
         });
       },
       failure: (errorMessage) => {
-        this.notifyError(errorMessage, 'getting review words');
+        this.notifyError('getting review words', errorMessage);
       }
     });
   }

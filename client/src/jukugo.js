@@ -18,7 +18,7 @@ class Jukugo extends React.Component {
 
     this.state = {
       loggedIn: false,
-      username: Cookies.get('username'),
+      username: localStorage.getItem('username'),
       activeContext: contexts.LOADING,
       nextContext: props.context || this.defaultContext,
       user: null,
@@ -54,8 +54,9 @@ class Jukugo extends React.Component {
   getUser() {
     const userUrl = `${this.baseUrl}/users/${this.state.username}`;
 
-    Utils.get(userUrl, {
+    Utils.authedGet(userUrl, {
       success: (response) => {
+        // response.user contains all the important info (learned kanji, etc)
         let nextState = {
           username: response.user.name,
           user: response.user,
@@ -68,14 +69,7 @@ class Jukugo extends React.Component {
         this.setState(nextState);
       },
       failure: (errorMessage) => {
-        console.log(`failed to get user ${this.state.username}`);
-
-        this.setState({
-          username: '',
-          user: null,
-          loggedIn: false,
-          activeContext: this.defaultContext
-        })
+        this.notifyError(`getting user ${this.state.username}`, errorMessage);
       }
     });
   }
@@ -92,12 +86,12 @@ class Jukugo extends React.Component {
     this.setState(nextState, () => {
       let url = `${this.baseUrl}/users/${this.state.username}/reset`;
 
-      Utils.post(url, {}, {
+      Utils.authedPost(url, {}, {
         success: (response) => {
           this.getUser();
         },
         failure: (errorMessage) => {
-          this.notifyError(errorMessage, 'resetting the user');
+          this.notifyError('resetting the user', errorMessage);
         }
       });
     });
@@ -109,7 +103,8 @@ class Jukugo extends React.Component {
   }
 
   // Used by the context to report errors
-  notifyError(errorMessage, failedAction) {
+  // TODO: add optional callback to do custom logic on error?
+  notifyError(failedAction, errorMessage) {
     console.log(`encountered an error while ${failedAction}: ${errorMessage}`);
 
     this.setState({
@@ -133,7 +128,7 @@ class Jukugo extends React.Component {
 
     Utils.post(logInUrl, body, {
       success: (response) => {
-        Cookies.set('username', body.username);
+        Utils.logInUser(body.username, response.sessionToken);
 
         let nextState = {
           username: body.username,
@@ -141,13 +136,11 @@ class Jukugo extends React.Component {
         };
 
         this.setState(nextState, () => {
-          console.log('username cookie is: ', Cookies.get('username'));
           this.getUser();
         });
       },
       failure: (errorMessage) => {
-        console.log(errorMessage);
-        // TODO: show the error
+        this.notifyError(`logging in username ${body.username}`, errorMessage);
       }
     });
   }
@@ -155,13 +148,22 @@ class Jukugo extends React.Component {
   logOut(event) {
     event.preventDefault();
 
-    Cookies.set('username', '');
+    let logOutUrl = `${this.baseUrl}/log_out`;
 
-    this.setState({
-      loggedIn: false,
-      username: '',
-      activeContext: this.defaultContext,
-      user: null
+    Utils.authedPost(logOutUrl, { username: this.state.username }, {
+      success: (response) => {
+        Utils.logOutUser();
+
+        this.setState({
+          loggedIn: false,
+          username: '',
+          activeContext: this.defaultContext,
+          user: null
+        });
+      },
+      failure: (errorMessage) => {
+        this.notifyError('logging out', errorMessage);
+      }
     });
   }
 
@@ -195,7 +197,7 @@ class Jukugo extends React.Component {
 
     Utils.post(signUpUrl, body, {
       success: (response) => {
-        Cookies.set('username', body.username);
+        Utils.logInUser(body.username, response.sessionToken);
 
         let nextState = {
           username: body.username,
@@ -208,8 +210,7 @@ class Jukugo extends React.Component {
         });
       },
       failure: (errorMessage) => {
-        console.log(errorMessage);
-        // TODO: show the error
+        this.notifyError(`signing up username {body.username}`, errorMessage);
       }
     });
   }

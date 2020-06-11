@@ -27,7 +27,7 @@ class FreshWords extends React.Component {
     let learnedWordId = event.target.id;
     let learnWordUrl = `${this.learnWordUrl}/${learnedWordId}`
 
-    Utils.post(learnWordUrl, {}, {
+    Utils.authedPost(learnWordUrl, {}, {
       success: (response) => {
         let newFreshWords = this.state.freshWords.filter((freshWord) => {
           return freshWord._id !== learnedWordId;
@@ -36,7 +36,7 @@ class FreshWords extends React.Component {
         this.updateFreshWords(newFreshWords);
       },
       failure: (errorMessage) => {
-        this.notifyError(errorMessage, 'learning a word');
+        this.notifyError('learning a word', errorMessage);
       }
     });
   }
@@ -47,7 +47,7 @@ class FreshWords extends React.Component {
     let ignoredWordId = event.target.id;
     let ignoreWordUrl = `${this.ignoreWordUrl}/${ignoredWordId}`
 
-    Utils.post(ignoreWordUrl, {}, {
+    Utils.authedPost(ignoreWordUrl, {}, {
       success: (response) => {
         let newFreshWords = this.state.freshWords.filter((freshWord) => {
           return freshWord._id !== ignoredWordId;
@@ -56,7 +56,7 @@ class FreshWords extends React.Component {
         this.updateFreshWords(newFreshWords);
       },
       failure: (errorMessage) => {
-        this.notifyError(errorMessage, 'ignoring a word');
+        this.notifyError('ignoring a word', errorMessage);
       }
     });
   }
