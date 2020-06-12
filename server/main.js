@@ -106,32 +106,39 @@ app.post('/log_in', async (request, response) => {
 
   console.log(`logging in ${username}`);
 
-  let checkPassword = (password, hashedPassword) => {
-    return new Promise((result, reject) => {
+  let checkPassword = (username, password) => {
+    return new Promise(async (result, reject) => {
       // ideally we could do this check before we get the user
       if (password.length === 0) {
         reject('no password entered');
+        return;
       }
 
-      bcrypt.compare(password, hashedPassword, async (err, isValid) => {
-        if (err) {
-          reject(`bcrypt error: ${err}`);
-        }
+      try {
+        let user = await User.findByName(db, username);
 
-        result(isValid);
-      });
+        bcrypt.compare(password, user.password, async (err, isValid) => {
+          if (err) {
+            reject(`bcrypt error: ${err}`);
+            return;
+          }
+
+          result(isValid);
+        });
+      } catch (err) {
+        reject(err);
+        return;
+      }
     })
   }
 
-  let user = await User.findByName(db, username);
-
-  checkPassword(password, user.password).then(async (isValid) => {
+  checkPassword(username, password).then(async (isValid) => {
     if (!isValid) {
       throw 'invalid password supplied';
     }
 
     let sessionToken = generateSessionToken();
-    sessionStore[user.name] = sessionToken;
+    sessionStore[username] = sessionToken;
 
     response.json({ sessionToken: sessionToken });
   }).catch((err) => {
