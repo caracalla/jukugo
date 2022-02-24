@@ -22,8 +22,100 @@ app.use(bodyParser.json());
 
 // test endpoint
 app.get('/', async (request, response) => {
-  console.log('just saying hi :)\n');
+  console.log(`just saying hi :)\n`);
+  console.log(`headers: ${JSON.stringify(request.headers, null, 2)}\n`);
   response.json({ message: 'hi' });
+});
+
+
+// view all words a user has learned, in table format
+app.get('/user/:name', async (request, response) => {
+  let username = request.params.name;
+
+  // we're going to build the page's HTML in this array
+  let content = [];
+
+  try {
+    let user = await User.findByName(db, username);
+    let entries = await Entry.findByIds(db, Object.keys(user.words.learned));
+
+    content.push(`<h1>${user.name}</h1>`);
+
+    content.push(`<p>user ${user.name} has learned ${entries.length} words</p>`);
+    content.push('<table>');
+    content.push('<thead>');
+    content.push('<tr>');
+    content.push('<th>writing</th> <th>level</th> <th>reading</th> <th>meaning</th>');
+    content.push('</tr>');
+    content.push('</thead>');
+
+    content.push('<tbody>');
+
+    let word_table_rows = [];
+
+    entries.forEach((entry) => {
+      let learned = user.words.learned[entry._id];
+      let level = learned.level;
+      let writing = entry['writings'] ? entry['writings'][0]['kanji'] : '';
+      let reading = entry['readings'] ? entry['readings'][0]['kana'] : '';
+      let meaning = entry['senses'][0]['translations'][0]['glossaries'].join(', ');
+
+      word_table_rows.push({
+        writing: writing,
+        reading: reading,
+        meaning: meaning,
+        level: level
+      });
+
+    });
+
+    word_table_rows.sort((row1, row2) => {
+      if (row1.level > row2.level) {
+        return -1;
+      }
+
+      if (row1.level < row2.level) {
+        return 1;
+      }
+
+      return 0;
+    });
+
+    word_table_rows.forEach((row) => {
+      content.push(`<tr><td>${row.writing}</td> <td>${row.level}</td> <td>${row.reading}</td> <td>${row.meaning}</td></tr>`);
+    });
+  } catch (err) {
+    content.push(`<p>got an error: ${err}</p>`);
+  }
+
+  content.push('</tbody>');
+  content.push('</table>');
+
+  response.set('Content-Type', 'text/html');
+
+  let page_html = `
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>${username}</title>
+
+    <style>
+      table, th, td {
+        border: 1px solid black;
+        border-collapse: collapse;
+        padding: 4px 10px;
+      }
+    </style>
+  </head>
+
+  <body>
+    ${content.join('')}
+  </body>
+</html>
+`;
+
+  response.send(page_html);
 });
 
 
@@ -86,6 +178,18 @@ app.post('/users', async (request, response) => {
       name: username,
       password: hashedPassword
     });
+
+    // I used this to reset my password
+    // let user = await User.findByName(db, username);
+    //
+    // await db.collection('users').updateOne(
+    //   { name: username },
+    //   {
+    //     $set: {
+    //       password: hashedPassword
+    //     }
+    //   }
+    // );
 
     let sessionToken = generateSessionToken();
     sessionStore[user.name] = sessionToken;
