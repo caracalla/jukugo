@@ -58,7 +58,7 @@ class ReviewWords extends React.Component {
 
     return (
       <div>
-        <h1>Review Words</h1>
+        <h1>Review ({this.state.reviewWords.length} words)</h1>
 
         <div className="row mt-2">
           {reviewWordCards}

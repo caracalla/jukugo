@@ -77,7 +77,8 @@ class Navbar extends React.Component {
               <a
                   className="dropdown-item"
                   href="#"
-                  onClick={ this.resetUser }>
+                  onClick={ this.resetUser }
+                  disabled>
                 Reset
               </a>
 
