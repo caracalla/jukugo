@@ -82,7 +82,7 @@ class FreshWords extends React.Component {
 
     return (
       <div>
-        <h1>Fresh Words</h1>
+        <h1>Fresh Words ({this.state.freshWords.length} words)</h1>
 
         <div className="row mt-2">
           {freshWordCards}

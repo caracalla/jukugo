@@ -125,12 +125,14 @@ class WordCard extends React.Component {
       );
     });
 
+    let primaryWordString = this.word.writings[0].kanji;
+
     return (
       <div className="col-lg-4 col-md-6 col-sm-12 mt-2 mb-3" key={ this.word._id }>
         <div className="card">
           <div className="card-header">
             <h1 className="card-title text-center display-4">
-              { this.word.writings[0].kanji }
+              { primaryWordString }
 
               {/* Trying to figure out a way to move learned words to ignore
               <div className="dropleft inline-block">
@@ -159,16 +161,28 @@ class WordCard extends React.Component {
 
               <WordModal
                   word={ this.word }
+                  wordString={ primaryWordString }
                   extractTranslations={ this.extractTranslations } />
 
-              <p className="card-text">
-                <button
-                    className="btn btn-outline-danger btn-block btn-sm"
-                    data-toggle="modal"
-                    data-target={`#modal-${this.word._id}`}>
-                  See more
-                </button>
-              </p>
+                <div className="row mb-3">
+                  <div className="col-9">
+                    <button
+                        className="btn btn-outline-danger btn-block btn-sm"
+                        data-toggle="modal"
+                        data-target={`#modal-${this.word._id}`}>
+                      See more
+                    </button>
+                  </div>
+
+                  <div className="col-3">
+                    <a
+                        className="btn btn-outline-primary btn-block btn-sm"
+                        target="_blank"
+                        href={WordModal.wiktionaryLink(primaryWordString)}>
+                      W
+                    </a>
+                  </div>
+                </div>
 
               { bottomButtons }
             </div>

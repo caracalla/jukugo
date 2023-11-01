@@ -5,12 +5,12 @@ class WordModal extends React.Component {
     super(props);
 
     this.word = props.word;
-    this.wordString = props.word.writings[0].kanji;
+    this.wordString = props.wordString;
 
     this.extractTranslations = props.extractTranslations;
   }
 
-  wiktionaryLink(item) {
+  static wiktionaryLink(item) {
     return `https://en.wiktionary.org/wiki/${item}#Japanese`;
   }
 
@@ -25,7 +25,7 @@ class WordModal extends React.Component {
         <a
             className="border border-primary rounded mx-1 p-1"
             target="_blank"
-            href={this.wiktionaryLink(character)}
+            href={WordModal.wiktionaryLink(character)}
             key={`${character}${kanjiCounter}`}>
           {character}
         </a>
@@ -67,7 +67,7 @@ class WordModal extends React.Component {
                 <a
                     className="btn btn-outline-primary btn-block"
                     target="_blank"
-                    href={this.wiktionaryLink(this.wordString)}>
+                    href={WordModal.wiktionaryLink(this.wordString)}>
                   Wiktionary page for {this.wordString}
                 </a>
               </p>
